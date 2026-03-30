@@ -24,12 +24,12 @@ public class FrmGoiMon extends JDialog {
     private JLabel lblTotal;
     private double totalAmount = 0; // Đổi sang kiểu double theo Entity
     private JButton btnGuiBep;
-
-    public FrmGoiMon(JFrame parent, String tenBan, int sucChua) {
+    private String maBan;
+    public FrmGoiMon(JFrame parent,String maBan, String tenBan, int sucChua) {
         super(parent, true);
         this.tenBan = tenBan;
         this.sucChua = sucChua;
-        
+        this.maBan= maBan;        
         setSize(1200, 750);
         setLocationRelativeTo(parent);
         setUndecorated(true);
@@ -121,22 +121,35 @@ public class FrmGoiMon extends JDialog {
 
         // --- KẾT NỐI DB ĐỂ LẤY MÓN ĂN THỰC TẾ ---
         DAO.MonAnDAO monAnDAO = new DAO.MonAnDAO();
+//        List<Entity.MonAn> danhSachMon = monAnDAO.getAllMonAn();
+//        
+//        for (Entity.MonAn mon : danhSachMon) {
+//            String icon = "🍽️"; 
+//            String ten = mon.getTenMon().toLowerCase();
+//            
+//            if (ten.contains("bò") || ten.contains("heo") || ten.contains("nướng")) icon = "🥩";
+//            else if (ten.contains("gà") || ten.contains("vịt")) icon = "🍗";
+//            else if (ten.contains("lẩu") || ten.contains("canh")) icon = "🍲";
+//            else if (ten.contains("bia") || ten.contains("nước") || ten.contains("trà")) icon = "🥤";
+//            else if (ten.contains("salad") || ten.contains("rau")) icon = "🥗";
+//
+//            // Truyền giá tiền kiểu double
+//            gridFood.add(createFoodCard(icon, mon.getTenMon(), mon.getGiaMon()));
+//        }
         List<Entity.MonAn> danhSachMon = monAnDAO.getAllMonAn();
-        
-        for (Entity.MonAn mon : danhSachMon) {
-            String icon = "🍽️"; 
-            String ten = mon.getTenMon().toLowerCase();
-            
-            if (ten.contains("bò") || ten.contains("heo") || ten.contains("nướng")) icon = "🥩";
-            else if (ten.contains("gà") || ten.contains("vịt")) icon = "🍗";
-            else if (ten.contains("lẩu") || ten.contains("canh")) icon = "🍲";
-            else if (ten.contains("bia") || ten.contains("nước") || ten.contains("trà")) icon = "🥤";
-            else if (ten.contains("salad") || ten.contains("rau")) icon = "🥗";
 
-            // Truyền giá tiền kiểu double
+        for (Entity.MonAn mon : danhSachMon) {
+        	String icon = "🍽️";
+            if (!mon.isTinhTrang()) continue;
+
+       
+
             gridFood.add(createFoodCard(icon, mon.getTenMon(), mon.getGiaMon()));
         }
 
+        // ⭐ bắt buộc
+        gridFood.revalidate();
+        gridFood.repaint();
         JScrollPane scroll = new JScrollPane(gridFood);
         scroll.setBorder(null);
         scroll.getViewport().setBackground(BG_MAIN);
@@ -256,7 +269,7 @@ public class FrmGoiMon extends JDialog {
         
         btnGuiBep.addActionListener(e -> {
             DAO.BanAnDAO dao = new DAO.BanAnDAO();
-            boolean thanhCong = dao.capNhatTrangThaiBan(tenBan, "Có khách");
+            boolean thanhCong = dao.capNhatTrangThaiBan(maBan, "Có khách");
             
             if(thanhCong) {
                 JOptionPane.showMessageDialog(this, "✅ Đã gửi đơn hàng xuống bếp thành công!");

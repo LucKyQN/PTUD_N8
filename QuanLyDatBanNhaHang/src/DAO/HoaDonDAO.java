@@ -684,11 +684,16 @@ public class HoaDonDAO {
     // 2. Chi tiết món ăn theo maHD
     public List<MonAnModel> getChiTietHoaDon(String maHD) {
         List<MonAnModel> list = new ArrayList<>();
+//        String sql =
+//            "SELECT m.tenMonAn, ct.soLuong, ct.donGia, ct.thanhTien " +
+//            "FROM ChiTietHoaDon ct " +
+//            "JOIN MonAn m ON ct.maMonAn = m.maMonAn " +
+//            "WHERE ct.maHD = ?";
         String sql =
-            "SELECT m.tenMonAn, ct.soLuong, ct.donGia, ct.thanhTien " +
-            "FROM ChiTietHoaDon ct " +
-            "JOIN MonAn m ON ct.maMonAn = m.maMonAn " +
-            "WHERE ct.maHD = ?";
+        	    "SELECT ct.maMonAn, m.tenMonAn, ct.soLuong, ct.donGia, ct.thanhTien " +
+        	    "FROM ChiTietHoaDon ct " +
+        	    "JOIN MonAn m ON ct.maMonAn = m.maMonAn " +
+        	    "WHERE ct.maHD = ?";
         try {
             Connection con = getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
@@ -696,6 +701,7 @@ public class HoaDonDAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 MonAnModel mon = new MonAnModel();
+                mon.maMonAn   = rs.getString("maMonAn");
                 mon.tenMonAn  = rs.getString("tenMonAn");
                 mon.soLuong   = rs.getInt("soLuong");
                 mon.donGia    = (long) rs.getDouble("donGia");
@@ -899,9 +905,7 @@ public class HoaDonDAO {
     }
 //}
 
-    // ============================================================
     //  PHỤC VỤ: Thêm hoặc tăng số lượng món trong ChiTietHoaDon
-    // ============================================================
     public boolean themHoacTangMon(String maHD, String maMonAn, int soLuongThem) {
         // Lấy đơn giá từ bảng MonAn
         String sqlGia = "SELECT giaBan FROM MonAn WHERE maMonAn = ?";

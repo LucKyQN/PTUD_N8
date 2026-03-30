@@ -1,0 +1,6 @@
+#Mon Mar 30 00:21:25 ICT 2026
+__DEFAULT__=false
+expression=capNhatTrangThaiBan
+org.eclipse.help.ui.localSearch.master=true
+org.eclipse.sdk.Eclipse.master=true
+org.eclipse.sdk.Google.master=true

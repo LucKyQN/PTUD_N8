@@ -624,474 +624,502 @@ import javax.swing.border.EmptyBorder;
 
 public class FrmLeTan extends JFrame {
 
-    private static final Color RED_MAIN    = new Color(220, 38, 38);
-    private static final Color BG_MAIN     = new Color(248, 248, 248);
-    private static final Color BORDER_CLR  = new Color(230, 230, 230);
-    private static final Color TEXT_DARK   = new Color(40, 40, 40);
-    private static final Color TEXT_GRAY   = new Color(120, 120, 120);
-    private static final Color BG_TRONG    = new Color(220, 252, 231);
-    private static final Color BORDER_TRONG = new Color(34, 197, 94);
-    private static final Color BG_KHACH    = new Color(254, 226, 226);
-    private static final Color BORDER_KHACH = new Color(239, 68, 68);
-    private static final Color BG_DAT      = new Color(254, 249, 195);
-    private static final Color BORDER_DAT  = new Color(234, 179, 8);
+	private static final Color RED_MAIN = new Color(220, 38, 38);
+	private static final Color BG_MAIN = new Color(248, 248, 248);
+	private static final Color BORDER_CLR = new Color(230, 230, 230);
+	private static final Color TEXT_DARK = new Color(40, 40, 40);
+	private static final Color TEXT_GRAY = new Color(120, 120, 120);
+	private static final Color BG_TRONG = new Color(220, 252, 231);
+	private static final Color BORDER_TRONG = new Color(34, 197, 94);
+	private static final Color BG_KHACH = new Color(254, 226, 226);
+	private static final Color BORDER_KHACH = new Color(239, 68, 68);
+	private static final Color BG_DAT = new Color(254, 249, 195);
+	private static final Color BORDER_DAT = new Color(234, 179, 8);
 
-    private JPanel gridMap;
-    private JLabel lblClock;
-    private String currentTab = "Tầng 1";
-    private JPanel tabsContainer;
-    private JLabel lblMapTitle;
+	private JPanel gridMap;
+	private JLabel lblClock;
+	private String currentTab = "Tầng 1";
+	private JPanel tabsContainer;
+	private JLabel lblMapTitle;
 
-    // DAO dùng chung
-    private final DAO.BanAnDAO banAnDAO   = new DAO.BanAnDAO();
-    private final DAO.HoaDonDAO hoaDonDAO = new DAO.HoaDonDAO();
+	// DAO dùng chung
+	private final DAO.BanAnDAO banAnDAO = new DAO.BanAnDAO();
+	private final DAO.HoaDonDAO hoaDonDAO = new DAO.HoaDonDAO();
 
-    public FrmLeTan() {
-        initUI();
-        startClock();
-    }
+	public FrmLeTan() {
+		initUI();
+		startClock();
+	}
 
-    private void initUI() {
-        setTitle("Nhà Hàng Ngói Đỏ - Lễ Tân");
-        setSize(1440, 860);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+	private void initUI() {
+		setTitle("Nhà Hàng Ngói Đỏ - Lễ Tân");
+		setSize(1440, 860);
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(BG_MAIN);
-        root.add(createTopBar(), BorderLayout.NORTH);
+		JPanel root = new JPanel(new BorderLayout());
+		root.setBackground(BG_MAIN);
+		root.add(createTopBar(), BorderLayout.NORTH);
 
-        JPanel centerWrap = new JPanel(new BorderLayout());
-        centerWrap.setOpaque(false);
-        centerWrap.add(createTabs(),   BorderLayout.NORTH);
-        centerWrap.add(createMapArea(), BorderLayout.CENTER);
+		JPanel centerWrap = new JPanel(new BorderLayout());
+		centerWrap.setOpaque(false);
+		centerWrap.add(createTabs(), BorderLayout.NORTH);
+		centerWrap.add(createMapArea(), BorderLayout.CENTER);
 
-        root.add(centerWrap, BorderLayout.CENTER);
-        root.add(createRightSidebar(), BorderLayout.EAST);
-        setContentPane(root);
-    }
+		root.add(centerWrap, BorderLayout.CENTER);
+		root.add(createRightSidebar(), BorderLayout.EAST);
+		setContentPane(root);
+	}
 
-    // ==========================================
-    // TOP BAR
-    // ==========================================
-    private JPanel createTopBar() {
-        JPanel bar = new JPanel(new BorderLayout());
-        bar.setBackground(Color.WHITE);
-        bar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_CLR),
-                new EmptyBorder(10, 20, 10, 20)));
+	// ==========================================
+	// TOP BAR
+	// ==========================================
+	private JPanel createTopBar() {
+		JPanel bar = new JPanel(new BorderLayout());
+		bar.setBackground(Color.WHITE);
+		bar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_CLR),
+				new EmptyBorder(10, 20, 10, 20)));
 
-        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-        left.setOpaque(false);
-        JLabel lblLogo = new JLabel("🏮");
-        lblLogo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 28));
-        lblLogo.setForeground(RED_MAIN);
-        JPanel textWrap = new JPanel(new GridLayout(2, 1));
-        textWrap.setOpaque(false);
-        JLabel lblName = new JLabel("Nhà Hàng Ngói Đỏ - Lễ Tân");
-        lblName.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        JLabel lblSub  = new JLabel("Quản lý đặt chỗ & Check-in");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblSub.setForeground(TEXT_GRAY);
-        textWrap.add(lblName); textWrap.add(lblSub);
-        left.add(lblLogo); left.add(textWrap);
+		JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+		left.setOpaque(false);
+		JLabel lblLogo = new JLabel("🏮");
+		lblLogo.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 28));
+		lblLogo.setForeground(RED_MAIN);
+		JPanel textWrap = new JPanel(new GridLayout(2, 1));
+		textWrap.setOpaque(false);
+		JLabel lblName = new JLabel("Nhà Hàng Ngói Đỏ - Lễ Tân");
+		lblName.setFont(new Font("Segoe UI", Font.BOLD, 16));
+		JLabel lblSub = new JLabel("Quản lý đặt chỗ & Check-in");
+		lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		lblSub.setForeground(TEXT_GRAY);
+		textWrap.add(lblName);
+		textWrap.add(lblSub);
+		left.add(lblLogo);
+		left.add(textWrap);
 
-        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
-        right.setOpaque(false);
-        lblClock = new JLabel("00:00:00");
-        lblClock.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        JLabel lblUser = new JLabel("👤 Lễ tân Ca sáng");
-        lblUser.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        JButton btnLogout = new JButton("Đăng xuất");
-        btnLogout.setContentAreaFilled(false); btnLogout.setBorderPainted(false);
-        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnLogout.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnLogout.addActionListener(e -> {
-            int c = JOptionPane.showConfirmDialog(this,
-                    "Bạn có chắc chắn muốn đăng xuất không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-            if (c == JOptionPane.YES_OPTION) { dispose(); new FrmDangNhap().setVisible(true); }
-        });
-        right.add(lblClock); right.add(lblUser); right.add(btnLogout);
+		JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
+		right.setOpaque(false);
+		lblClock = new JLabel("00:00:00");
+		lblClock.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		JLabel lblUser = new JLabel("👤 Lễ tân Ca sáng");
+		lblUser.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		JButton btnLogout = new JButton("Đăng xuất");
+		btnLogout.setContentAreaFilled(false);
+		btnLogout.setBorderPainted(false);
+		btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		btnLogout.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		btnLogout.addActionListener(e -> {
+			int c = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất không?", "Xác nhận",
+					JOptionPane.YES_NO_OPTION);
+			if (c == JOptionPane.YES_OPTION) {
+				dispose();
+				new FrmDangNhap().setVisible(true);
+			}
+		});
+		right.add(lblClock);
+		right.add(lblUser);
+		right.add(btnLogout);
 
-        bar.add(left, BorderLayout.WEST);
-        bar.add(right, BorderLayout.EAST);
-        return bar;
-    }
+		bar.add(left, BorderLayout.WEST);
+		bar.add(right, BorderLayout.EAST);
+		return bar;
+	}
 
-    private void startClock() {
-        new Timer(1000, e ->
-            lblClock.setText("🕒 " + new SimpleDateFormat("HH:mm:ss").format(new Date()))
-        ).start();
-    }
+	private void startClock() {
+		new Timer(1000, e -> lblClock.setText("🕒 " + new SimpleDateFormat("HH:mm:ss").format(new Date()))).start();
+	}
 
-    // ==========================================
-    // TABS
-    // ==========================================
-    private JPanel createTabs() {
-        tabsContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 0));
-        tabsContainer.setBackground(Color.WHITE);
-        tabsContainer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_CLR),
-                new EmptyBorder(10, 20, 0, 20)));
+	// ==========================================
+	// TABS
+	// ==========================================
+	private JPanel createTabs() {
+		tabsContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 0));
+		tabsContainer.setBackground(Color.WHITE);
+		tabsContainer.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_CLR), new EmptyBorder(10, 20, 0, 20)));
 
-        String[] tabNames = {"Tầng 1", "Tầng 2", "Phòng VIP"};
-        for (int i = 0; i < tabNames.length; i++) {
-            JLabel lbl = new JLabel(tabNames[i]);
-            lbl.setFont(new Font("Segoe UI", i == 0 ? Font.BOLD : Font.PLAIN, 14));
-            lbl.setForeground(i == 0 ? RED_MAIN : TEXT_DARK);
-            lbl.setBorder(i == 0
-                    ? BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(0, 0, 3, 0, RED_MAIN),
-                        new EmptyBorder(0, 0, 7, 0))
-                    : new EmptyBorder(0, 0, 10, 0));
-            lbl.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            lbl.addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) {
-                    currentTab = lbl.getText();
-                    updateTabUI();
-                    refreshSoDoBan();
-                }
-            });
-            tabsContainer.add(lbl);
-        }
-        return tabsContainer;
-    }
+		String[] tabNames = { "Tầng 1", "Tầng 2", "Phòng VIP" };
+		for (int i = 0; i < tabNames.length; i++) {
+			JLabel lbl = new JLabel(tabNames[i]);
+			lbl.setFont(new Font("Segoe UI", i == 0 ? Font.BOLD : Font.PLAIN, 14));
+			lbl.setForeground(i == 0 ? RED_MAIN : TEXT_DARK);
+			lbl.setBorder(
+					i == 0 ? BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, RED_MAIN),
+							new EmptyBorder(0, 0, 7, 0)) : new EmptyBorder(0, 0, 10, 0));
+			lbl.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			lbl.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					currentTab = lbl.getText();
+					updateTabUI();
+					refreshSoDoBan();
+				}
+			});
+			tabsContainer.add(lbl);
+		}
+		return tabsContainer;
+	}
 
-    private void updateTabUI() {
-        for (Component c : tabsContainer.getComponents()) {
-            if (c instanceof JLabel lbl) {
-                boolean sel = lbl.getText().equals(currentTab);
-                lbl.setFont(new Font("Segoe UI", sel ? Font.BOLD : Font.PLAIN, 14));
-                lbl.setForeground(sel ? RED_MAIN : TEXT_DARK);
-                lbl.setBorder(sel
-                        ? BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(0, 0, 3, 0, RED_MAIN),
-                            new EmptyBorder(0, 0, 7, 0))
-                        : new EmptyBorder(0, 0, 10, 0));
-            }
-        }
-    }
+	private void updateTabUI() {
+		for (Component c : tabsContainer.getComponents()) {
+			if (c instanceof JLabel lbl) {
+				boolean sel = lbl.getText().equals(currentTab);
+				lbl.setFont(new Font("Segoe UI", sel ? Font.BOLD : Font.PLAIN, 14));
+				lbl.setForeground(sel ? RED_MAIN : TEXT_DARK);
+				lbl.setBorder(
+						sel ? BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, RED_MAIN),
+								new EmptyBorder(0, 0, 7, 0)) : new EmptyBorder(0, 0, 10, 0));
+			}
+		}
+	}
 
-    // ==========================================
-    // SƠ ĐỒ BÀN
-    // ==========================================
-    private JPanel createMapArea() {
-        JPanel mapWrap = new JPanel(new BorderLayout());
-        mapWrap.setOpaque(false);
-        mapWrap.setBorder(new EmptyBorder(20, 20, 20, 20));
+	// ==========================================
+	// SƠ ĐỒ BÀN
+	// ==========================================
+	private JPanel createMapArea() {
+		JPanel mapWrap = new JPanel(new BorderLayout());
+		mapWrap.setOpaque(false);
+		mapWrap.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JPanel header = new JPanel(new GridLayout(2, 1, 0, 5));
-        header.setOpaque(false); header.setBorder(new EmptyBorder(0, 0, 20, 0));
-        lblMapTitle = new JLabel("Sơ đồ bàn - " + currentTab);
-        lblMapTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        JLabel sub = new JLabel("Click vào bàn trống hoặc đã đặt để bắt đầu phục vụ");
-        sub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        sub.setForeground(TEXT_GRAY);
-        header.add(lblMapTitle); header.add(sub);
+		JPanel header = new JPanel(new GridLayout(2, 1, 0, 5));
+		header.setOpaque(false);
+		header.setBorder(new EmptyBorder(0, 0, 20, 0));
+		lblMapTitle = new JLabel("Sơ đồ bàn - " + currentTab);
+		lblMapTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+		JLabel sub = new JLabel("Click vào bàn trống hoặc đã đặt để bắt đầu phục vụ");
+		sub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		sub.setForeground(TEXT_GRAY);
+		header.add(lblMapTitle);
+		header.add(sub);
 
-        gridMap = new JPanel(new GridLayout(0, 4, 15, 15));
-        gridMap.setOpaque(false);
-        JPanel wrapGrid = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        wrapGrid.setOpaque(false);
-        wrapGrid.add(gridMap);
-        refreshSoDoBan();
+		gridMap = new JPanel(new GridLayout(0, 4, 15, 15));
+		gridMap.setOpaque(false);
+		JPanel wrapGrid = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		wrapGrid.setOpaque(false);
+		wrapGrid.add(gridMap);
+		refreshSoDoBan();
 
-        JScrollPane scroll = new JScrollPane(wrapGrid);
-        scroll.setBorder(null); scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
+		JScrollPane scroll = new JScrollPane(wrapGrid);
+		scroll.setBorder(null);
+		scroll.setOpaque(false);
+		scroll.getViewport().setOpaque(false);
+		scroll.getVerticalScrollBar().setUnitIncrement(16);
 
-        mapWrap.add(header, BorderLayout.NORTH);
-        mapWrap.add(scroll, BorderLayout.CENTER);
-        return mapWrap;
-    }
+		mapWrap.add(header, BorderLayout.NORTH);
+		mapWrap.add(scroll, BorderLayout.CENTER);
+		return mapWrap;
+	}
 
-    // ==========================================
-    // CARD BÀN - nhận maBan thật từ DB
-    // ==========================================
-    private JPanel createTableCard(String maBan, String tenBan, int capacity, String status) {
-        Color bg, border;
-        if (status.equalsIgnoreCase("Trống"))        { bg = BG_TRONG; border = BORDER_TRONG; }
-        else if (status.equalsIgnoreCase("Có khách")) { bg = BG_KHACH; border = BORDER_KHACH; }
-        else                                           { bg = BG_DAT;   border = BORDER_DAT;   }
+	// ==========================================
+	// CARD BÀN - nhận maBan thật từ DB
+	// ==========================================
+	private JPanel createTableCard(String maBan, String tenBan, int capacity, String status) {
+		Color bg, border;
+		if (status.equalsIgnoreCase("Trống")) {
+			bg = BG_TRONG;
+			border = BORDER_TRONG;
+		} else if (status.equalsIgnoreCase("Có khách")) {
+			bg = BG_KHACH;
+			border = BORDER_KHACH;
+		} else {
+			bg = BG_DAT;
+			border = BORDER_DAT;
+		}
 
-        JPanel card = new JPanel() {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(bg);
-                g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, 10);
-                g2.setColor(border);
-                g2.setStroke(new BasicStroke(1.5f));
-                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, 10);
-                g2.dispose();
-            }
-        };
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setPreferredSize(new Dimension(220, 130));
-        card.setOpaque(false);
-        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		JPanel card = new JPanel() {
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g2.setColor(bg);
+				g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+				g2.setColor(border);
+				g2.setStroke(new BasicStroke(1.5f));
+				g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+				g2.dispose();
+			}
+		};
+		card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+		card.setPreferredSize(new Dimension(220, 130));
+		card.setOpaque(false);
+		card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JLabel icon = new JLabel("🪑", SwingConstants.CENTER);
-        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
-        icon.setForeground(border); icon.setAlignmentX(Component.CENTER_ALIGNMENT);
+		JLabel icon = new JLabel("🪑", SwingConstants.CENTER);
+		icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
+		icon.setForeground(border);
+		icon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblName = new JLabel(tenBan, SwingConstants.CENTER);
-        lblName.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lblName.setAlignmentX(Component.CENTER_ALIGNMENT);
+		JLabel lblName = new JLabel(tenBan, SwingConstants.CENTER);
+		lblName.setFont(new Font("Segoe UI", Font.BOLD, 15));
+		lblName.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblCap = new JLabel("Sức chứa: " + capacity + " người", SwingConstants.CENTER);
-        lblCap.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblCap.setForeground(new Color(80, 80, 80));
-        lblCap.setAlignmentX(Component.CENTER_ALIGNMENT);
+		JLabel lblCap = new JLabel("Sức chứa: " + capacity + " người", SwingConstants.CENTER);
+		lblCap.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		lblCap.setForeground(new Color(80, 80, 80));
+		lblCap.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lblStatus = new JLabel(status, SwingConstants.CENTER);
-        lblStatus.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblStatus.setAlignmentX(Component.CENTER_ALIGNMENT);
+		JLabel lblStatus = new JLabel(status, SwingConstants.CENTER);
+		lblStatus.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		lblStatus.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        card.add(Box.createVerticalStrut(15));
-        card.add(icon); card.add(Box.createVerticalStrut(5));
-        card.add(lblName); card.add(Box.createVerticalStrut(5));
-        card.add(lblCap); card.add(Box.createVerticalStrut(5));
-        card.add(lblStatus);
+		card.add(Box.createVerticalStrut(15));
+		card.add(icon);
+		card.add(Box.createVerticalStrut(5));
+		card.add(lblName);
+		card.add(Box.createVerticalStrut(5));
+		card.add(lblCap);
+		card.add(Box.createVerticalStrut(5));
+		card.add(lblStatus);
 
-        card.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) {
-                card.setBorder(BorderFactory.createLineBorder(border, 2));
-            }
-            @Override public void mouseExited(MouseEvent e) { card.setBorder(null); }
+		card.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				card.setBorder(BorderFactory.createLineBorder(border, 2));
+			}
 
-            @Override public void mouseClicked(MouseEvent e) {
-                if (status.equalsIgnoreCase("Trống")) {
-                    xuLyMoBan(maBan, tenBan, capacity);
+			@Override
+			public void mouseExited(MouseEvent e) {
+				card.setBorder(null);
+			}
 
-                } else if (status.equalsIgnoreCase("Có khách")
-                        || status.equalsIgnoreCase("Đã đặt")) {
-                    FrmThanhToan frmTT = new FrmThanhToan(FrmLeTan.this, tenBan);
-                    frmTT.setVisible(true);
-                    refreshSoDoBan();
-                }
-            }
-        });
-        return card;
-    }
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (status.equalsIgnoreCase("Trống")) {
+					xuLyMoBan(maBan, tenBan, capacity);
 
-    // ============================================================
-    //  MỞ BÀN: tạo HoaDon → cập nhật trangThai bàn → mở FrmGoiMon
-    // ============================================================
-    private void xuLyMoBan(String maBan, String tenBan, int sucChua) {
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Mở bàn \"" + tenBan + "\" cho khách mới?",
-                "Xác nhận mở bàn", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
+				} else if (status.equalsIgnoreCase("Có khách") || status.equalsIgnoreCase("Đã đặt")) {
+					FrmThanhToan frmTT = new FrmThanhToan(FrmLeTan.this, tenBan);
+					frmTT.setVisible(true);
+					refreshSoDoBan();
+				}
+			}
+		});
+		return card;
+	}
 
-        // Tạo maHD: "HD" + timestamp để đảm bảo không trùng
-        String maHD = "HD" + System.currentTimeMillis();
+	// MỞ BÀN: tạo HoaDon → cập nhật trangThai bàn → mở FrmGoiMon
+	private void xuLyMoBan(String maBan, String tenBan, int sucChua) {
+		int confirm = JOptionPane.showConfirmDialog(this, "Mở bàn \"" + tenBan + "\" cho khách mới?", "Xác nhận mở bàn",
+				JOptionPane.YES_NO_OPTION);
+		if (confirm != JOptionPane.YES_OPTION)
+			return;
 
-        // TODO: truyền maNV thật từ NhanVien đăng nhập vào FrmLeTan
-        String maNV = "NV001";
+		// Tạo maHD: "HD" + timestamp để đảm bảo không trùng
+		String maHD = "HD" + System.currentTimeMillis();
 
-        boolean hdOk  = hoaDonDAO.taoHoaDonMoi(maHD, maNV, maBan);
-        boolean banOk = banAnDAO.capNhatTrangThaiBan(tenBan, "Có khách");
+		// TODO: truyền maNV thật từ NhanVien đăng nhập vào FrmLeTan
+		String maNV = "NV001";
 
-        if (hdOk && banOk) {
-            refreshSoDoBan();
-            FrmGoiMon frm = new FrmGoiMon(FrmLeTan.this, tenBan, sucChua);
-            frm.setVisible(true);
-            refreshSoDoBan();
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Lỗi: Không thể mở bàn!\nHD: " + hdOk + " | Bàn: " + banOk,
-                    "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+		boolean hdOk = hoaDonDAO.taoHoaDonMoi(maHD, maNV, maBan);
+		boolean banOk = banAnDAO.capNhatTrangThaiBan(maBan, "Có khách");
 
-    // ==========================================
-    // RIGHT SIDEBAR
-    // ==========================================
-    private JPanel createRightSidebar() {
-        JPanel sidebar = new JPanel(new BorderLayout());
-        sidebar.setBackground(Color.WHITE);
-        sidebar.setPreferredSize(new Dimension(320, 0));
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, BORDER_CLR));
+		if (hdOk && banOk) {
+			refreshSoDoBan();
+			FrmGoiMon frm = new FrmGoiMon(FrmLeTan.this, maBan, tenBan, sucChua);
+			frm.setVisible(true);
+			refreshSoDoBan();
+		} else {
+			JOptionPane.showMessageDialog(this, "Lỗi: Không thể mở bàn!\nHD: " + hdOk + " | Bàn: " + banOk, "Lỗi",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
 
-        JPanel top = new JPanel();
-        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
-        top.setBackground(Color.WHITE);
-        top.setBorder(new EmptyBorder(20, 20, 20, 20));
+	// RIGHT SIDEBAR
+	private JPanel createRightSidebar() {
+		JPanel sidebar = new JPanel(new BorderLayout());
+		sidebar.setBackground(Color.WHITE);
+		sidebar.setPreferredSize(new Dimension(320, 0));
+		sidebar.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, BORDER_CLR));
 
-        JLabel title = new JLabel("Quản lý Đặt chỗ");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+		JPanel top = new JPanel();
+		top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
+		top.setBackground(Color.WHITE);
+		top.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JTextField txtSearch = new JTextField();
-        txtSearch.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        txtSearch.setPreferredSize(new Dimension(0, 35));
-        txtSearch.setText("🔍 Tìm khách hàng / SĐT");
-        txtSearch.setForeground(TEXT_GRAY);
-        txtSearch.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER_CLR, 1, true),
-                new EmptyBorder(0, 10, 0, 10)));
+		JLabel title = new JLabel("Quản lý Đặt chỗ");
+		title.setFont(new Font("Segoe UI", Font.BOLD, 16));
+		title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel subTitle = new JLabel("Đặt chỗ hôm nay");
-        subTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        subTitle.setBorder(new EmptyBorder(20, 0, 10, 0));
-        subTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+		JTextField txtSearch = new JTextField();
+		txtSearch.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+		txtSearch.setPreferredSize(new Dimension(0, 35));
+		txtSearch.setText("🔍 Tìm khách hàng / SĐT");
+		txtSearch.setForeground(TEXT_GRAY);
+		txtSearch.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(BORDER_CLR, 1, true),
+				new EmptyBorder(0, 10, 0, 10)));
 
-        top.add(title);
-        top.add(Box.createVerticalStrut(15));
-        top.add(txtSearch);
-        top.add(subTitle);
+		JLabel subTitle = new JLabel("Đặt chỗ hôm nay");
+		subTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+		subTitle.setBorder(new EmptyBorder(20, 0, 10, 0));
+		subTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel list = new JPanel();
-        list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
-        list.setBackground(Color.WHITE);
-        list.setBorder(new EmptyBorder(0, 20, 0, 20));
+		top.add(title);
+		top.add(Box.createVerticalStrut(15));
+		top.add(txtSearch);
+		top.add(subTitle);
 
-        // Booking cards - dùng maBan thật từ DB
-        // TODO: load từ bảng DonDatMon thay vì hardcode
-        list.add(createBookingCard("Nguyễn Văn A", "0901234567", "19:00", "BAN03", "Bàn 03", 6));
-        list.add(Box.createVerticalStrut(15));
-        list.add(createBookingCard("Trần Thị B",   "0912345678", "20:00", "BAN03", "VIP 02", 8));
+		JPanel list = new JPanel();
+		list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
+		list.setBackground(Color.WHITE);
+		list.setBorder(new EmptyBorder(0, 20, 0, 20));
 
-        JScrollPane scroll = new JScrollPane(list);
-        scroll.setBorder(null);
+		// Booking cards - dùng maBan thật từ DB
+		// TODO: load từ bảng DonDatMon thay vì hardcode
+		list.add(createBookingCard("Nguyễn Văn A", "0901234567", "19:00", "BAN03", "Bàn 03", 6));
+		list.add(Box.createVerticalStrut(15));
+		list.add(createBookingCard("Trần Thị B", "0912345678", "20:00", "BAN03", "VIP 02", 8));
 
-        JPanel actions = new JPanel(new GridLayout(4, 1, 0, 10));
-        actions.setBackground(Color.WHITE);
-        actions.setBorder(new EmptyBorder(20, 20, 20, 20));
-        JLabel lblQuick = new JLabel("Thao tác nhanh");
-        lblQuick.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        actions.add(lblQuick);
+		JScrollPane scroll = new JScrollPane(list);
+		scroll.setBorder(null);
 
-        JButton btnTaoDatCho = createSolidButton("+ Tạo đặt chỗ mới", RED_MAIN, Color.WHITE);
-        btnTaoDatCho.addActionListener(e -> { new FrmTaoDatCho(this).setVisible(true); });
-        actions.add(btnTaoDatCho);
+		JPanel actions = new JPanel(new GridLayout(4, 1, 0, 10));
+		actions.setBackground(Color.WHITE);
+		actions.setBorder(new EmptyBorder(20, 20, 20, 20));
+		JLabel lblQuick = new JLabel("Thao tác nhanh");
+		lblQuick.setFont(new Font("Segoe UI", Font.BOLD, 14));
+		actions.add(lblQuick);
 
-        JButton btnChuyenBan = createOutlineButton("⇆ Chuyển bàn");
-        btnChuyenBan.addActionListener(e -> { new FrmChuyenBan(this).setVisible(true); });
-        actions.add(btnChuyenBan);
+		JButton btnTaoDatCho = createSolidButton("+ Tạo đặt chỗ mới", RED_MAIN, Color.WHITE);
+		btnTaoDatCho.addActionListener(e -> {
+			new FrmTaoDatCho(this).setVisible(true);
+		});
+		actions.add(btnTaoDatCho);
 
-        JButton btnGopBan = createOutlineButton("⛙ Gộp bàn");
-        btnGopBan.addActionListener(e -> { new FrmGopBan(this).setVisible(true); });
-        actions.add(btnGopBan);
+		JButton btnChuyenBan = createOutlineButton("⇆ Chuyển bàn");
+		btnChuyenBan.addActionListener(e -> {
+			new FrmChuyenBan(this).setVisible(true);
+		});
+		actions.add(btnChuyenBan);
 
-        sidebar.add(top, BorderLayout.NORTH);
-        sidebar.add(scroll, BorderLayout.CENTER);
-        sidebar.add(actions, BorderLayout.SOUTH);
-        return sidebar;
-    }
+		JButton btnGopBan = createOutlineButton("⛙ Gộp bàn");
+		btnGopBan.addActionListener(e -> {
+			new FrmGopBan(this).setVisible(true);
+		});
+		actions.add(btnGopBan);
 
-    // Booking card — nhận maBan thật để Check-in đúng
-    private JPanel createBookingCard(String name, String phone, String time,
-                                     String maBan, String tenBan, int guests) {
-        JPanel card = new JPanel() {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(254, 252, 232));
-                g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 8, 8);
-                g2.setColor(new Color(253, 224, 71));
-                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 8, 8);
-                g2.dispose();
-            }
-        };
-        card.setLayout(new BorderLayout(10, 10));
-        card.setOpaque(false);
-        card.setBorder(new EmptyBorder(10, 12, 10, 12));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+		sidebar.add(top, BorderLayout.NORTH);
+		sidebar.add(scroll, BorderLayout.CENTER);
+		sidebar.add(actions, BorderLayout.SOUTH);
+		return sidebar;
+	}
 
-        JPanel info = new JPanel(new GridLayout(3, 2)); info.setOpaque(false);
-        JLabel lName  = new JLabel(name);  lName.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        JLabel lTime  = new JLabel(time, SwingConstants.RIGHT); lTime.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        JLabel lPhone = new JLabel(phone); lPhone.setFont(new Font("Segoe UI", Font.PLAIN, 12)); lPhone.setForeground(TEXT_GRAY);
-        JLabel lTable = new JLabel("Bàn: " + tenBan); lTable.setFont(new Font("Segoe UI", Font.PLAIN, 12)); lTable.setForeground(TEXT_GRAY);
-        JLabel lGuests = new JLabel(guests + " người", SwingConstants.RIGHT); lGuests.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        info.add(lName); info.add(lTime);
-        info.add(lPhone); info.add(new JLabel(""));
-        info.add(lTable); info.add(lGuests);
+	// Booking card — nhận maBan thật để Check-in đúng
+	private JPanel createBookingCard(String name, String phone, String time, String maBan, String tenBan, int guests) {
+		JPanel card = new JPanel() {
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g2.setColor(new Color(254, 252, 232));
+				g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+				g2.setColor(new Color(253, 224, 71));
+				g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+				g2.dispose();
+			}
+		};
+		card.setLayout(new BorderLayout(10, 10));
+		card.setOpaque(false);
+		card.setBorder(new EmptyBorder(10, 12, 10, 12));
+		card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
 
-        JButton btnCheckIn = createSolidButton("Check-in Khách", RED_MAIN, Color.WHITE);
-        btnCheckIn.setPreferredSize(new Dimension(0, 30));
-        btnCheckIn.addActionListener(e -> xuLyCheckIn(name, maBan, tenBan, card));
+		JPanel info = new JPanel(new GridLayout(3, 2));
+		info.setOpaque(false);
+		JLabel lName = new JLabel(name);
+		lName.setFont(new Font("Segoe UI", Font.BOLD, 14));
+		JLabel lTime = new JLabel(time, SwingConstants.RIGHT);
+		lTime.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		JLabel lPhone = new JLabel(phone);
+		lPhone.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		lPhone.setForeground(TEXT_GRAY);
+		JLabel lTable = new JLabel("Bàn: " + tenBan);
+		lTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		lTable.setForeground(TEXT_GRAY);
+		JLabel lGuests = new JLabel(guests + " người", SwingConstants.RIGHT);
+		lGuests.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		info.add(lName);
+		info.add(lTime);
+		info.add(lPhone);
+		info.add(new JLabel(""));
+		info.add(lTable);
+		info.add(lGuests);
 
-        card.add(info, BorderLayout.CENTER);
-        card.add(btnCheckIn, BorderLayout.SOUTH);
-        return card;
-    }
+		JButton btnCheckIn = createSolidButton("Check-in Khách", RED_MAIN, Color.WHITE);
+		btnCheckIn.setPreferredSize(new Dimension(0, 30));
+		btnCheckIn.addActionListener(e -> xuLyCheckIn(name, maBan, tenBan, card));
 
-    // ============================================================
-    //  CHECK-IN từ booking: tạo HoaDon + cập nhật trangThai bàn
-    // ============================================================
-    private void xuLyCheckIn(String tenKhach, String maBan, String tenBan, JPanel cardRef) {
-        int xacNhan = JOptionPane.showConfirmDialog(cardRef,
-                "Check-in cho khách " + tenKhach + " vào " + tenBan + "?",
-                "Xác nhận Check-in", JOptionPane.YES_NO_OPTION);
-        if (xacNhan != JOptionPane.YES_OPTION) return;
+		card.add(info, BorderLayout.CENTER);
+		card.add(btnCheckIn, BorderLayout.SOUTH);
+		return card;
+	}
 
-        String maHD = "HD" + System.currentTimeMillis();
-        String maNV = "NV001"; // TODO: lấy từ NhanVien đăng nhập
+	// CHECK-IN từ booking: tạo HoaDon + cập nhật trangThai bàn
+	private void xuLyCheckIn(String tenKhach, String maBan, String tenBan, JPanel cardRef) {
+		int xacNhan = JOptionPane.showConfirmDialog(cardRef, "Check-in cho khách " + tenKhach + " vào " + tenBan + "?",
+				"Xác nhận Check-in", JOptionPane.YES_NO_OPTION);
+		if (xacNhan != JOptionPane.YES_OPTION)
+			return;
 
-        boolean hdOk  = hoaDonDAO.taoHoaDonMoi(maHD, maNV, maBan);
-        boolean banOk = banAnDAO.capNhatTrangThaiBan(tenBan, "Có khách");
+		String maHD = "HD" + System.currentTimeMillis();
+		String maNV = "NV001"; // TODO: lấy từ NhanVien đăng nhập
 
-        if (hdOk && banOk) {
-            JOptionPane.showMessageDialog(cardRef,
-                    "✅ Check-in thành công cho " + tenKhach + "!\nMã HĐ: " + maHD,
-                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            refreshSoDoBan();
-        } else {
-            JOptionPane.showMessageDialog(cardRef,
-                    "Lỗi khi check-in!\nHD: " + hdOk + " | Bàn: " + banOk,
-                    "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+		boolean hdOk = hoaDonDAO.taoHoaDonMoi(maHD, maNV, maBan);
+		boolean banOk = banAnDAO.capNhatTrangThaiBan(maBan, "Có khách");
 
-    private JButton createSolidButton(String text, Color bg, Color fg) {
-        JButton btn = new JButton(text);
-        btn.setBackground(bg); btn.setForeground(fg);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setFocusPainted(false); btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
+		if (hdOk && banOk) {
+			JOptionPane.showMessageDialog(cardRef, "✅ Check-in thành công cho " + tenKhach + "!\nMã HĐ: " + maHD,
+					"Thành công", JOptionPane.INFORMATION_MESSAGE);
+			refreshSoDoBan();
+		} else {
+			JOptionPane.showMessageDialog(cardRef, "Lỗi khi check-in!\nHD: " + hdOk + " | Bàn: " + banOk, "Lỗi",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
 
-    private JButton createOutlineButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setBackground(Color.WHITE); btn.setForeground(TEXT_DARK);
-        btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createLineBorder(BORDER_CLR, 1));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
+	private JButton createSolidButton(String text, Color bg, Color fg) {
+		JButton btn = new JButton(text);
+		btn.setBackground(bg);
+		btn.setForeground(fg);
+		btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		btn.setFocusPainted(false);
+		btn.setBorderPainted(false);
+		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		return btn;
+	}
 
-    // ==========================================
-    // REFRESH SƠ ĐỒ BÀN — truyền maBan thật vào card
-    // ==========================================
-    public void refreshSoDoBan() {
-        if (gridMap == null) return;
-        gridMap.removeAll();
-        if (lblMapTitle != null) lblMapTitle.setText("Sơ đồ bàn - " + currentTab);
+	private JButton createOutlineButton(String text) {
+		JButton btn = new JButton(text);
+		btn.setBackground(Color.WHITE);
+		btn.setForeground(TEXT_DARK);
+		btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		btn.setFocusPainted(false);
+		btn.setBorder(BorderFactory.createLineBorder(BORDER_CLR, 1));
+		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		return btn;
+	}
 
-        List<Entity.BanAn> danhSachBan = banAnDAO.getAllBanAn();
+	// REFRESH SƠ ĐỒ BÀN — truyền maBan thật vào card
+	public void refreshSoDoBan() {
+		if (gridMap == null)
+			return;
+		gridMap.removeAll();
+		if (lblMapTitle != null)
+			lblMapTitle.setText("Sơ đồ bàn - " + currentTab);
 
-        for (Entity.BanAn ban : danhSachBan) {
-            String viTri = ban.getViTri();
-            if (viTri != null && viTri.trim().equalsIgnoreCase(currentTab)) {
-                gridMap.add(createTableCard(
-                        ban.getMaBan(),       // maBan thật: "BAN01", "BAN02"...
-                        ban.getTenBan(),      // tenBan hiển thị: "Bàn 1", "Bàn 2"...
-                        ban.getSucChua(),
-                        ban.getTrangThai().trim()
-                ));
-            }
-        }
-        gridMap.revalidate();
-        gridMap.repaint();
-    }
+		List<Entity.BanAn> danhSachBan = banAnDAO.getAllBanAn();
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new FrmLeTan().setVisible(true));
-    }
+		for (Entity.BanAn ban : danhSachBan) {
+			String viTri = ban.getViTri();
+			if (viTri != null && viTri.trim().equalsIgnoreCase(currentTab)) {
+				gridMap.add(createTableCard(ban.getMaBan(), // maBan thật: "BAN01", "BAN02"...
+						ban.getTenBan(), // tenBan hiển thị: "Bàn 1", "Bàn 2"...
+						ban.getSucChua(), ban.getTrangThai().trim()));
+			}
+		}
+		gridMap.revalidate();
+		gridMap.repaint();
+	}
+
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(() -> new FrmLeTan().setVisible(true));
+	}
 }

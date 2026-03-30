@@ -4,7 +4,9 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-
+import DAO.MonAnDAO;
+import Entity.MonAn;
+import java.util.List;
 public class FrmTaoDatCho extends JDialog {
 
     private static final Color RED_MAIN = new Color(220, 38, 38);
@@ -94,7 +96,17 @@ public class FrmTaoDatCho extends JDialog {
 
         // Khởi tạo ComboBox chọn bàn (Sử dụng biến toàn cục)
         // MẸO: Tên bàn ở đây phải khớp chuẩn xác với tên bàn trong SQL của bạn
-        cbBan = new JComboBox<>(new String[]{"Chọn bàn", "Bàn 1", "Bàn 2", "Bàn VIP 1"});
+        //cbBan = new JComboBox<>(new String[]{"Chọn bàn", "Bàn 1", "Bàn 2", "Bàn VIP 1"});
+        DAO.BanAnDAO dao = new DAO.BanAnDAO();
+        List<Entity.BanAn> dsBan = dao.getAllBanAn();
+
+        cbBan = new JComboBox<>();
+        cbBan.addItem("Chọn bàn");
+
+        for (Entity.BanAn ban : dsBan) {
+            // hiển thị: BAN01 - Bàn 1
+            cbBan.addItem(ban.getMaBan() + " - " + ban.getTenBan());
+        }
         pnlLeft.add(createInputGroup("Chọn bàn *", cbBan));
         pnlLeft.add(Box.createVerticalStrut(15));
 
@@ -123,13 +135,22 @@ public class FrmTaoDatCho extends JDialog {
         listFood.setLayout(new BoxLayout(listFood, BoxLayout.Y_AXIS));
         listFood.setBackground(Color.WHITE);
         
-        listFood.add(createFoodItem("🥩", "Bò Nướng Sả", 250000, "Món Nướng"));
-        listFood.add(Box.createVerticalStrut(10));
-        listFood.add(createFoodItem("🍗", "Gà Nướng Mật Ong", 180000, "Món Nướng"));
-        listFood.add(Box.createVerticalStrut(10));
-        listFood.add(createFoodItem("🍲", "Lẩu Thái Hải Sản", 350000, "Lẩu"));
-        listFood.add(Box.createVerticalStrut(10));
-        listFood.add(createFoodItem("🥘", "Lẩu Bò Nhúng Giấm", 320000, "Lẩu"));
+        MonAnDAO monAnDAO = new MonAnDAO();
+        List<MonAn> dsMon = monAnDAO.getAllMonAn();
+
+        for (MonAn mon : dsMon) {
+
+            // chỉ lấy món đang phục vụ
+            if (!mon.isTinhTrang()) continue;
+
+            String ten = mon.getTenMon();
+            int gia = (int) mon.getGiaMon();
+
+            String icon = getIconByName(ten);
+
+            listFood.add(createFoodItem(icon, ten, gia, "Món ăn"));
+            listFood.add(Box.createVerticalStrut(10));
+        }
 
         JScrollPane scrollFood = new JScrollPane(listFood);
         scrollFood.setBorder(BorderFactory.createLineBorder(BORDER_CLR));
@@ -169,6 +190,19 @@ public class FrmTaoDatCho extends JDialog {
         body.add(pnlLeft);
         body.add(pnlRight);
         return body;
+    }
+    private String getIconByName(String ten) {
+        if (ten == null) return "🍽️";
+
+        ten = ten.toLowerCase();
+
+        if (ten.contains("bò") || ten.contains("heo") || ten.contains("nướng")) return "🥩";
+        if (ten.contains("gà") || ten.contains("vịt")) return "🍗";
+        if (ten.contains("lẩu") || ten.contains("canh")) return "🍲";
+        if (ten.contains("bia") || ten.contains("nước") || ten.contains("trà")) return "🥤";
+        if (ten.contains("salad") || ten.contains("rau")) return "🥗";
+
+        return "🍽️";
     }
 
     // --- 3. FOOTER ---

@@ -17,10 +17,13 @@ public class NhanVienDAO {
         ConnectDB.getInstance().connect();
         return ConnectDB.getInstance().getConnection();
     }
-
     public NhanVien dangNhap(String username, String password) {
         NhanVien nv = null;
-        String sql = "SELECT * FROM NhanVien WHERE username = ? AND password = ? AND trangThai = 1";
+
+        String sql = "SELECT * FROM NhanVien " +
+                     "WHERE username COLLATE Latin1_General_CS_AS = ? " +
+                     "AND password COLLATE Latin1_General_CS_AS = ? " +
+                     "AND trangThai = 1";
 
         try {
             Connection con = getConnection();
@@ -42,6 +45,30 @@ public class NhanVienDAO {
 
         return nv;
     }
+//    public NhanVien dangNhap(String username, String password) {
+//        NhanVien nv = null;
+//        String sql = "SELECT * FROM NhanVien WHERE username = ? AND password = ? AND trangThai = 1";
+//
+//        try {
+//            Connection con = getConnection();
+//            PreparedStatement stmt = con.prepareStatement(sql);
+//            stmt.setString(1, username);
+//            stmt.setString(2, password);
+//
+//            ResultSet rs = stmt.executeQuery();
+//
+//            if (rs.next()) {
+//                nv = mapNhanVien(rs);
+//            }
+//
+//            rs.close();
+//            stmt.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return nv;
+//    }
 
     public List<NhanVien> getAllNhanVien() {
         List<NhanVien> list = new ArrayList<>();

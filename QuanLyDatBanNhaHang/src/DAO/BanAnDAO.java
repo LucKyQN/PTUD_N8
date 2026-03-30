@@ -230,7 +230,7 @@ public class BanAnDAO {
 
         return list;
     }
-
+  
     public List<BanAn> getAllBanAn() {
         List<BanAn> list = new ArrayList<>();
 

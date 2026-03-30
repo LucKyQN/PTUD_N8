@@ -256,7 +256,7 @@ public class FrmQLNhanVien extends JPanel {
             txtUsername = new JTextField();
             txtPassword = new JPasswordField();
 
-            cboVaiTro = new JComboBox<>(new String[]{"Quản lý", "Thu ngân", "Nhân viên"});
+            cboVaiTro = new JComboBox<>(new String[]{"Quản lý", "Thu ngân", "Nhân viên","Lễ tân","Phục vụ"});
             chkTrangThai = new JCheckBox("Đang hoạt động");
             chkTrangThai.setSelected(true);
             chkTrangThai.setOpaque(false);

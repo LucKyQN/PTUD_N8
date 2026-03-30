@@ -51,6 +51,7 @@ public class MonAnDAO {
                 "       m.moTa, m.ghiChu, m.anhMon, m.tinhTrang " +
                 "FROM MonAn m " +
                 "LEFT JOIN DanhMucMonAn d ON m.maDM = d.maDM " +
+                "WHERE m.tinhTrang = 1 " +
                 "ORDER BY m.maMonAn";
 
         try {
