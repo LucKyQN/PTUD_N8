@@ -8,4 +8,5 @@
     <fullyQualifiedTypeName name="DAO.PhucVuServiceMemory"/>
     <fullyQualifiedTypeName name="Entity.NhanVien"/>
     <fullyQualifiedTypeName name="java.sql.SQLException"/>
+    <fullyQualifiedTypeName name="javax.swing.JComboBox"/>
 </qualifiedTypeNameHistroy>

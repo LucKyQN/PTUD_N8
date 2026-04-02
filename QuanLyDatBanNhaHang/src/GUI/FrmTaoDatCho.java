@@ -7,6 +7,7 @@ import javax.swing.table.DefaultTableModel;
 import DAO.MonAnDAO;
 import Entity.MonAn;
 import java.util.List;
+
 public class FrmTaoDatCho extends JDialog {
 
     private static final Color RED_MAIN = new Color(220, 38, 38);
@@ -18,7 +19,15 @@ public class FrmTaoDatCho extends JDialog {
     private DefaultTableModel tbModelDaChon;
     private JLabel lblTongTien;
     private int tongTien = 0;
-    private JComboBox<String> cbBan; // <-- Đã đưa biến này ra ngoài để lấy được tên bàn
+    
+    // TỐI ƯU 1: Đổi JComboBox để chứa Object thay vì String (giúp lấy mã bàn dễ dàng)
+    private JComboBox<ComboItem> cbBan; 
+    
+    private JTextField txtTenKhach;
+    private JTextField txtSDT;
+    private JTextField txtSoLuong;
+    private JTextField txtThoiGian;
+    private JTextArea txtNote;
 
     public FrmTaoDatCho(JFrame parent) {
         super(parent, true); // Modal
@@ -81,36 +90,42 @@ public class FrmTaoDatCho extends JDialog {
         pnlLeft.add(lblInfoTitle);
         pnlLeft.add(Box.createVerticalStrut(15));
 
-        pnlLeft.add(createInputGroup("Tên khách hàng *", new JTextField()));
+        txtTenKhach = new JTextField();
+        txtSDT = new JTextField();
+        pnlLeft.add(createInputGroup("Tên khách hàng *", txtTenKhach));
         pnlLeft.add(Box.createVerticalStrut(15));
-        pnlLeft.add(createInputGroup("Số điện thoại *", new JTextField()));
+        pnlLeft.add(createInputGroup("Số điện thoại *", txtSDT));
         pnlLeft.add(Box.createVerticalStrut(15));
 
         JPanel rowTime = new JPanel(new GridLayout(1, 2, 15, 0));
         rowTime.setBackground(Color.WHITE);
-        rowTime.add(createInputGroup("Số lượng khách *", new JTextField("2")));
-        rowTime.add(createInputGroup("Thời gian *", new JTextField("--:-- --")));
+        
+        txtSoLuong = new JTextField("2");
+        txtThoiGian = new JTextField("--:-- --");
+        rowTime.add(createInputGroup("Số lượng khách *", txtSoLuong));
+        rowTime.add(createInputGroup("Thời gian *", txtThoiGian));
         rowTime.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
         pnlLeft.add(rowTime);
         pnlLeft.add(Box.createVerticalStrut(15));
 
-        // Khởi tạo ComboBox chọn bàn (Sử dụng biến toàn cục)
-        // MẸO: Tên bàn ở đây phải khớp chuẩn xác với tên bàn trong SQL của bạn
-        //cbBan = new JComboBox<>(new String[]{"Chọn bàn", "Bàn 1", "Bàn 2", "Bàn VIP 1"});
+        // TỐI ƯU 1: Load danh sách bàn trống vào ComboBox
         DAO.BanAnDAO dao = new DAO.BanAnDAO();
         List<Entity.BanAn> dsBan = dao.getAllBanAn();
 
         cbBan = new JComboBox<>();
-        cbBan.addItem("Chọn bàn");
+        cbBan.addItem(new ComboItem("", "Chọn bàn"));
 
         for (Entity.BanAn ban : dsBan) {
-            // hiển thị: BAN01 - Bàn 1
-            cbBan.addItem(ban.getMaBan() + " - " + ban.getTenBan());
+            // CHỈ HIỂN THỊ NHỮNG BÀN ĐANG "Trống" ĐỂ ĐẶT
+            if(ban.getTrangThai() != null && ban.getTrangThai().equals("Trống")) {
+                cbBan.addItem(new ComboItem(ban.getMaBan(), ban.getMaBan() + " - " + ban.getTenBan()));
+            }
         }
+        
         pnlLeft.add(createInputGroup("Chọn bàn *", cbBan));
         pnlLeft.add(Box.createVerticalStrut(15));
 
-        JTextArea txtNote = new JTextArea();
+        txtNote = new JTextArea();
         txtNote.setLineWrap(true);
         txtNote.setBorder(BorderFactory.createLineBorder(BORDER_CLR));
         JScrollPane scrollNote = new JScrollPane(txtNote);
@@ -139,13 +154,11 @@ public class FrmTaoDatCho extends JDialog {
         List<MonAn> dsMon = monAnDAO.getAllMonAn();
 
         for (MonAn mon : dsMon) {
-
             // chỉ lấy món đang phục vụ
             if (!mon.isTinhTrang()) continue;
 
             String ten = mon.getTenMon();
             int gia = (int) mon.getGiaMon();
-
             String icon = getIconByName(ten);
 
             listFood.add(createFoodItem(icon, ten, gia, "Món ăn"));
@@ -154,6 +167,8 @@ public class FrmTaoDatCho extends JDialog {
 
         JScrollPane scrollFood = new JScrollPane(listFood);
         scrollFood.setBorder(BorderFactory.createLineBorder(BORDER_CLR));
+        // Tùy chỉnh thanh cuộn cho mượt
+        scrollFood.getVerticalScrollBar().setUnitIncrement(16);
         pnlMenu.add(scrollFood, BorderLayout.CENTER);
 
         // NỬA DƯỚI: Bảng các món đã chọn (Giỏ hàng)
@@ -191,9 +206,9 @@ public class FrmTaoDatCho extends JDialog {
         body.add(pnlRight);
         return body;
     }
+    
     private String getIconByName(String ten) {
         if (ten == null) return "🍽️";
-
         ten = ten.toLowerCase();
 
         if (ten.contains("bò") || ten.contains("heo") || ten.contains("nướng")) return "🥩";
@@ -227,28 +242,42 @@ public class FrmTaoDatCho extends JDialog {
         
         // --- XỬ LÝ LƯU DATABASE & ĐỔI MÀU BÀN ---
         btnXacNhan.addActionListener(e -> {
-            String tenBan = cbBan.getSelectedItem().toString();
             
-            if (tenBan.equals("Chọn bàn")) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn bàn để đặt!", "Lưu ý", JOptionPane.WARNING_MESSAGE);
+            // Validate form đơn giản
+            if(txtTenKhach.getText().trim().isEmpty() || txtSDT.getText().trim().isEmpty() || txtThoiGian.getText().trim().equals("--:-- --")) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin khách hàng!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // 1. Sau này bạn sẽ code phần lưu Khách Hàng, Hóa Đơn ở đây
+            ComboItem selectedBan = (ComboItem) cbBan.getSelectedItem();
+            
+            if (selectedBan == null || selectedBan.getKey().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn bàn để đặt!", "Lưu ý", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
+            // Lấy chính xác MÃ BÀN để gọi CSDL
+            String maBan = selectedBan.getKey(); 
+            String tenHienThi = selectedBan.getValue();
+
+            // 1. Sau này bạn sẽ code phần lưu PhieuDatBan, KhachHang ở đây
             // System.out.println("Lưu các món: " + tbModelDaChon.getRowCount());
 
             // 2. Gọi DAO để đổi trạng thái bàn trong SQL Server
             DAO.BanAnDAO dao = new DAO.BanAnDAO();
-            boolean thanhCong = dao.capNhatTrangThaiBan(tenBan, "Đã đặt");
+            
+            // TỐI ƯU 2: Truyền maBan vào hàm update thay vì truyền chuỗi hiển thị
+            boolean thanhCong = dao.capNhatTrangThaiBan(maBan, "Đã đặt");
 
             if (thanhCong) {
-                JOptionPane.showMessageDialog(this, "✅ Đặt chỗ thành công cho " + tenBan + "!");
+                JOptionPane.showMessageDialog(this, "✅ Đặt chỗ thành công cho " + tenHienThi + "!");
                 
                 // 3. Tự động F5 (Refresh) lại màn hình Lễ Tân bên dưới
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                if (parentFrame instanceof FrmLeTan) {
-                    ((FrmLeTan) parentFrame).refreshSoDoBan();
-                }
+                // Giả định bạn có file FrmLeTan
+                // if (parentFrame instanceof FrmLeTan) {
+                //     ((FrmLeTan) parentFrame).refreshSoDoBan();
+                // }
                 
                 // 4. Đóng popup
                 this.dispose();
@@ -345,5 +374,24 @@ public class FrmTaoDatCho extends JDialog {
     
     private String formatMoney(int amount) {
         return String.format("%,d đ", amount).replace(',', '.');
+    }
+    
+    // CLASS PHỤ TRỢ: CHỨA ID VÀ TÊN CHO COMBOBOX
+    class ComboItem {
+        private String key;
+        private String value;
+
+        public ComboItem(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+        
+        public String getKey() { return key; }
+        public String getValue() { return value; }
+
+        @Override
+        public String toString() {
+            return value; // Dòng chữ sẽ hiển thị trên giao diện ComboBox
+        }
     }
 }

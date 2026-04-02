@@ -161,7 +161,25 @@ public class MonAnDAO {
             return false;
         }
     }
+ // HÀM MỚI: XÓA HOÀN TOÀN KHỎI DATABASE
+    public boolean xoaHoanToanMonAn(String maMonAn) {
+        String sql = "DELETE FROM MonAn WHERE maMonAn = ?";
 
+        try {
+            Connection con = getConnection();
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, maMonAn);
+
+            int rows = stmt.executeUpdate();
+            stmt.close();
+
+            return rows > 0;
+        } catch (Exception e) {
+            System.err.println("Lỗi xóa hoàn toàn (có thể do dính khóa ngoại): " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
     public boolean tonTaiMaMonAn(String maMonAn) {
         String sql = "SELECT COUNT(*) FROM MonAn WHERE maMonAn = ?";
 

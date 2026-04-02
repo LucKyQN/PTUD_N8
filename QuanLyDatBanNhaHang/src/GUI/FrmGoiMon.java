@@ -121,21 +121,7 @@ public class FrmGoiMon extends JDialog {
 
         // --- KẾT NỐI DB ĐỂ LẤY MÓN ĂN THỰC TẾ ---
         DAO.MonAnDAO monAnDAO = new DAO.MonAnDAO();
-//        List<Entity.MonAn> danhSachMon = monAnDAO.getAllMonAn();
-//        
-//        for (Entity.MonAn mon : danhSachMon) {
-//            String icon = "🍽️"; 
-//            String ten = mon.getTenMon().toLowerCase();
-//            
-//            if (ten.contains("bò") || ten.contains("heo") || ten.contains("nướng")) icon = "🥩";
-//            else if (ten.contains("gà") || ten.contains("vịt")) icon = "🍗";
-//            else if (ten.contains("lẩu") || ten.contains("canh")) icon = "🍲";
-//            else if (ten.contains("bia") || ten.contains("nước") || ten.contains("trà")) icon = "🥤";
-//            else if (ten.contains("salad") || ten.contains("rau")) icon = "🥗";
-//
-//            // Truyền giá tiền kiểu double
-//            gridFood.add(createFoodCard(icon, mon.getTenMon(), mon.getGiaMon()));
-//        }
+
         List<Entity.MonAn> danhSachMon = monAnDAO.getAllMonAn();
 
         for (Entity.MonAn mon : danhSachMon) {
