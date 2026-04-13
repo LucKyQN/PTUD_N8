@@ -289,7 +289,7 @@ public class FrmThuNgan extends JFrame {
 		lbTongTien.setFont(new Font("Segoe UI", Font.BOLD, 24));
 		lbTongTien.setForeground(RED_MAIN);
 
-		txtKhachDua = new JTextField("0");
+		txtKhachDua = new JTextField("");
 		txtKhachDua.setPreferredSize(new Dimension(150, 30));
 		txtKhachDua.setFont(new Font("Segoe UI", Font.BOLD, 14));
 		txtKhachDua.setHorizontalAlignment(JTextField.RIGHT);
@@ -385,12 +385,47 @@ public class FrmThuNgan extends JFrame {
 
 	// SỰ KIỆN NÚT BẤM
 	private void xuLyThanhToan(BanAnModel ban) {
-		int opt = JOptionPane.showConfirmDialog(this, "Xác nhận khách đã trả tiền cho " + ban.tenBan + "?",
+		String s = txtKhachDua.getText().trim().replace(".", "").replace(",", "");
+
+		if (s.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Vui lòng nhập số tiền khách đưa.");
+			txtKhachDua.requestFocus();
+			return;
+		}
+
+		long khachDua;
+		try {
+			khachDua = Long.parseLong(s);
+		} catch (NumberFormatException ex) {
+			JOptionPane.showMessageDialog(this, "Số tiền khách đưa không hợp lệ.");
+			txtKhachDua.requestFocus();
+			txtKhachDua.selectAll();
+			return;
+		}
+
+		if (khachDua <= 0) {
+			JOptionPane.showMessageDialog(this, "Số tiền khách đưa phải lớn hơn 0.");
+			txtKhachDua.requestFocus();
+			txtKhachDua.selectAll();
+			return;
+		}
+
+		if (khachDua < tongCuoiCung) {
+			JOptionPane.showMessageDialog(this, "Khách đưa chưa đủ tiền để thanh toán.\n" + "Khách đưa: "
+					+ formatTien(khachDua) + " đ\n" + "Tổng cộng: " + formatTien(tongCuoiCung) + " đ");
+			txtKhachDua.requestFocus();
+			txtKhachDua.selectAll();
+			return;
+		}
+
+		int opt = JOptionPane.showConfirmDialog(this,
+				"Xác nhận khách đã trả tiền cho " + ban.tenBan + "?\n" + "Khách đưa: " + formatTien(khachDua) + " đ\n"
+						+ "Tổng cộng: " + formatTien(tongCuoiCung) + " đ\n" + "Tiền thừa: "
+						+ formatTien(khachDua - tongCuoiCung) + " đ",
 				"Thanh toán", JOptionPane.YES_NO_OPTION);
 
 		if (opt == JOptionPane.YES_OPTION) {
 			String maKM = dsKM_Current.get(cboKM_Current.getSelectedIndex())[0];
-			// Thanh toán với chiết khấu bằng tay = 0 (vì đã có KM hệ thống)
 			if (dao.thanhToan(ban.maHD, 0.0, maKM)) {
 				JOptionPane.showMessageDialog(this, "✅ Đã lưu hóa đơn & giải phóng bàn!");
 				banDangChon = null;
@@ -401,6 +436,23 @@ public class FrmThuNgan extends JFrame {
 			}
 		}
 	}
+//	private void xuLyThanhToan(BanAnModel ban) {
+//		int opt = JOptionPane.showConfirmDialog(this, "Xác nhận khách đã trả tiền cho " + ban.tenBan + "?",
+//				"Thanh toán", JOptionPane.YES_NO_OPTION);
+//
+//		if (opt == JOptionPane.YES_OPTION) {
+//			String maKM = dsKM_Current.get(cboKM_Current.getSelectedIndex())[0];
+//			// Thanh toán với chiết khấu bằng tay = 0 (vì đã có KM hệ thống)
+//			if (dao.thanhToan(ban.maHD, 0.0, maKM)) {
+//				JOptionPane.showMessageDialog(this, "✅ Đã lưu hóa đơn & giải phóng bàn!");
+//				banDangChon = null;
+//				taiDanhSachBan();
+//				hienThiChoChon();
+//			} else {
+//				JOptionPane.showMessageDialog(this, "❌ Lỗi: Không thể kết nối cơ sở dữ liệu!");
+//			}
+//		}
+//	}
 
 	private void xacNhanHuyDon(BanAnModel ban) {
 		int opt = JOptionPane.showConfirmDialog(this,

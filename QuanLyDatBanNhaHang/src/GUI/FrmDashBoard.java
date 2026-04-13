@@ -38,7 +38,7 @@ public class FrmDashBoard extends JFrame {
 	private FrmQLBanAn pnlBanAn;
 	private FrmQLKhuyenMai pnlKhuyenMai;
 	private FrmBaoCaoDoanhThu pnlBaoCao;
-
+	private FrmQLSoDoBan pnlSoDoBan;
 	private final Map<String, JPanel> menuMap = new LinkedHashMap<>();
 	private String activeMenu = "Dashboard";
 
@@ -127,6 +127,7 @@ public class FrmDashBoard extends JFrame {
 		JPanel btnDashboard = createMenuButton("🏠", "Dashboard");
 		JPanel btnThucDon = createMenuButton("🍽", "Quản lý Thực đơn");
 		JPanel btnBan = createMenuButton("🪑", "Quản lý Bàn");
+		JPanel btnSoDoBan = createMenuButton("🗺", "Quản Lý Sơ Đồ Bàn");
 
 		JPanel btnNhanSu = createMenuButton("👥", "Quản lý Nhân sự");
 		JPanel btnKhuyenMai = createMenuButton("🎁", "Quản lý Khuyến mãi");
@@ -139,6 +140,8 @@ public class FrmDashBoard extends JFrame {
 		menuMap.put("Quản lý Nhân sự", btnNhanSu);
 		menuMap.put("Quản lý Khuyến mãi", btnKhuyenMai);
 		menuMap.put("Báo cáo Doanh thu", btnBaoCao);
+		menuMap.put("Quản Lý Sơ Đồ Bàn", btnSoDoBan);
+
 		menuMap.put("Cài đặt", btnCaiDat);
 
 		addMenuAction(btnDashboard, "Dashboard");
@@ -146,6 +149,8 @@ public class FrmDashBoard extends JFrame {
 		addMenuAction(btnBan, "Quản lý Bàn");
 		addMenuAction(btnNhanSu, "Quản lý Nhân sự");
 		addMenuAction(btnKhuyenMai, "Quản lý Khuyến mãi");
+		addMenuAction(btnSoDoBan, "Quản Lý Sơ Đồ Bàn");
+
 		addMenuAction(btnBaoCao, "Báo cáo Doanh thu");
 		addMenuAction(btnCaiDat, "Cài đặt");
 
@@ -160,6 +165,8 @@ public class FrmDashBoard extends JFrame {
 		menuPanel.add(btnKhuyenMai);
 		menuPanel.add(Box.createVerticalStrut(6));
 		menuPanel.add(btnBaoCao);
+		menuPanel.add(Box.createVerticalStrut(6));
+		menuPanel.add(btnSoDoBan);
 		menuPanel.add(Box.createVerticalStrut(6));
 		menuPanel.add(btnCaiDat);
 
@@ -272,6 +279,10 @@ public class FrmDashBoard extends JFrame {
 					showPage("BAOCAO", "Báo cáo Doanh thu", "Theo dõi doanh thu và hiệu suất kinh doanh",
 							"Báo cáo Doanh thu");
 					break;
+				case "Quản Lý Sơ Đồ Bàn":
+					showPage("SODOBAN", "Quản Lý Sơ Đồ Bàn", "Theo dõi bàn trống, bàn có khách và bàn đã đặt",
+							"Quản Lý Sơ Đồ Bàn");
+					break;
 				case "Cài đặt":
 					JOptionPane.showMessageDialog(FrmDashBoard.this, "Chức năng Cài đặt sẽ được phát triển sau.",
 							"Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -312,7 +323,8 @@ public class FrmDashBoard extends JFrame {
 		pnlBanAn = new FrmQLBanAn();
 		pnlKhuyenMai = new FrmQLKhuyenMai();
 		pnlBaoCao = new FrmBaoCaoDoanhThu();
-
+		pnlSoDoBan = new FrmQLSoDoBan();
+		contentPanel.add(pnlSoDoBan, "SODOBAN");
 		contentPanel.add(dashboardPanel, "DASHBOARD");
 		contentPanel.add(pnlNhanVien, "NHANVIEN");
 		contentPanel.add(pnlMonAn, "MONAN");
