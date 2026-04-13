@@ -1,8 +1,14 @@
 package GUI;
 
 import java.awt.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import Entity.BanComboItem;
+import Entity.BanAn;
+import DAO.BanAnDAO;
+import DAO.HoaDonDAO;
 
 public class FrmChuyenBan extends JDialog {
 
@@ -10,11 +16,20 @@ public class FrmChuyenBan extends JDialog {
     private static final Color BORDER_CLR = new Color(230, 230, 230);
     private static final Color TEXT_DARK = new Color(40, 40, 40);
 
-    private JComboBox<String> cbBanCu;
-    private JComboBox<String> cbBanMoi;
+    // Chuyển JComboBox<String> thành JComboBox<BanComboItem> để lấy được mã bàn
+    private JComboBox<BanComboItem> cbBanCu;
+    private JComboBox<BanComboItem> cbBanMoi;
+    
+    private FrmLeTan parentFrm; // Lưu trữ tham chiếu đến form Lễ Tân để gọi refresh
+    private BanAnDAO banAnDAO = new BanAnDAO();
+    private HoaDonDAO hoaDonDAO = new HoaDonDAO();
+    
+    // Đưa listBan ra ngoài thành biến toàn cục của class để dùng cho việc tra cứu sức chứa
+    private List<BanAn> listBan;
 
-    public FrmChuyenBan(JFrame parent) {
+    public FrmChuyenBan(FrmLeTan parent) {
         super(parent, true); // Modal: Khóa màn hình chính khi popup này hiện lên
+        this.parentFrm = parent;
         setUndecorated(true); // Bỏ viền Windows mặc định
         setSize(500, 350);    // Kích thước nhỏ gọn
         setLocationRelativeTo(parent);
@@ -28,6 +43,9 @@ public class FrmChuyenBan extends JDialog {
         root.add(createFooter(), BorderLayout.SOUTH);
 
         setContentPane(root);
+        
+        // Load dữ liệu bàn thực tế từ DB
+        loadData();
     }
 
     private JPanel createHeader() {
@@ -59,16 +77,36 @@ public class FrmChuyenBan extends JDialog {
         body.setBackground(Color.WHITE);
         body.setBorder(new EmptyBorder(20, 30, 20, 30));
 
-        // MẸO: Sau này bạn sẽ dùng DAO để lấy danh sách bàn ĐANG CÓ KHÁCH đưa vào cbBanCu
-        cbBanCu = new JComboBox<>(new String[]{"-- Chọn bàn đang ngồi --", "Bàn 1", "Bàn VIP 1"});
+        // Khởi tạo JComboBox chứa đối tượng BanComboItem
+        cbBanCu = new JComboBox<>();
+        cbBanCu.setBackground(Color.WHITE);
         
-        // MẸO: Dùng DAO để lấy danh sách bàn TRỐNG đưa vào cbBanMoi
-        cbBanMoi = new JComboBox<>(new String[]{"-- Chọn bàn muốn chuyển đến --", "Bàn 2", "Bàn 3", "Bàn 4"});
+        cbBanMoi = new JComboBox<>();
+        cbBanMoi.setBackground(Color.WHITE);
 
         body.add(createInputGroup("Từ bàn (Đang có khách):", cbBanCu));
         body.add(createInputGroup("Đến bàn (Bàn trống):", cbBanMoi));
 
         return body;
+    }
+
+    // Hàm load dữ liệu thực tế từ Database
+    private void loadData() {
+        listBan = banAnDAO.getAllBanAn();
+        cbBanCu.removeAllItems();
+        cbBanMoi.removeAllItems();
+        
+        for (BanAn ban : listBan) {
+            String trangThai = ban.getTrangThai().trim();
+            // Đổ bàn đang có khách vào combo Bàn Cũ
+            if (trangThai.equalsIgnoreCase("Có khách")) {
+                cbBanCu.addItem(new BanComboItem(ban.getMaBan(), ban.getTenBan()));
+            } 
+            // Đổ bàn trống vào combo Bàn Mới
+            else if (trangThai.equalsIgnoreCase("Trống")) {
+                cbBanMoi.addItem(new BanComboItem(ban.getMaBan(), ban.getTenBan()));
+            }
+        }
     }
 
     private JPanel createFooter() {
@@ -92,31 +130,78 @@ public class FrmChuyenBan extends JDialog {
         
         // --- LOGIC XỬ LÝ CHUYỂN BÀN THỰC TẾ ---
         btnXacNhan.addActionListener(e -> {
-            String tuBan = cbBanCu.getSelectedItem().toString();
-            String denBan = cbBanMoi.getSelectedItem().toString();
+            BanComboItem tuBan = (BanComboItem) cbBanCu.getSelectedItem();
+            BanComboItem denBan = (BanComboItem) cbBanMoi.getSelectedItem();
 
-            if(tuBan.contains("--") || denBan.contains("--")) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ bàn đi và bàn đến!");
+            if (tuBan == null || denBan == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ bàn đi và bàn đến hợp lệ!");
                 return;
             }
 
-            // 1. Gọi Database xử lý đổi trạng thái cả 2 bàn
-            DAO.BanAnDAO dao = new DAO.BanAnDAO();
-            boolean thanhCong = dao.chuyenHoacGopBan(tuBan, denBan);
-
-            if (thanhCong) {
-                JOptionPane.showMessageDialog(this, "✅ Đã chuyển khách từ " + tuBan + " sang " + denBan + " thành công!");
-                
-                // 2. Ép màn hình Lễ Tân phải F5 (Vẽ lại sơ đồ bàn)
-                JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                if (parentFrame instanceof FrmLeTan) {
-                    ((FrmLeTan) parentFrame).refreshSoDoBan();
+            // ==============================================================
+            // BẮT ĐẦU: LOGIC KIỂM TRA SỨC CHỨA BÀN ĐÍCH TRƯỚC KHI CHUYỂN
+            // ==============================================================
+            
+            // 1. Lấy số lượng khách thực tế đang ngồi ở bàn cũ
+            String[] infoKhach = hoaDonDAO.getThongTinKhachVuaMo(tuBan.getMaBan());
+            int soKhachHienTai = 0;
+            if (infoKhach != null && infoKhach[2] != null) {
+                try {
+                    soKhachHienTai = Integer.parseInt(infoKhach[2]);
+                } catch (NumberFormatException ex) {
+                    soKhachHienTai = 0; // Tránh lỗi parse
                 }
-                
-                // 3. Đóng popup
-                this.dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "❌ Lỗi kết nối CSDL khi chuyển bàn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Không tìm thấy dữ liệu hóa đơn của " + tuBan.getTenBan(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // 2. Tìm sức chứa của bàn đích (duyệt từ listBan đã load)
+            int sucChuaBanDich = 0;
+            for (BanAn ban : listBan) {
+                if (ban.getMaBan().equals(denBan.getMaBan())) {
+                    sucChuaBanDich = ban.getSucChua();
+                    break;
+                }
+            }
+
+            // 3. Tiến hành so sánh
+            if (soKhachHienTai > sucChuaBanDich) {
+                String canhBao = "Không thể chuyển! Bàn đích không đủ chỗ.\n\n"
+                               + "- Số khách cần chuyển: " + soKhachHienTai + " người\n"
+                               + "- Sức chứa của " + denBan.getTenBan() + ": " + sucChuaBanDich + " người";
+                
+                JOptionPane.showMessageDialog(this, canhBao, "Cảnh báo quá tải", JOptionPane.WARNING_MESSAGE);
+                return; // Ngắt hàm, chặn không cho chạy lệnh chuyển bên dưới
+            }
+            // ==============================================================
+            // KẾT THÚC LOGIC KIỂM TRA SỨC CHỨA
+            // ==============================================================
+
+            int confirm = JOptionPane.showConfirmDialog(this, 
+                "Chuyển " + soKhachHienTai + " khách từ " + tuBan.getTenBan() + " sang " + denBan.getTenBan() + "?", 
+                "Xác nhận", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                // 1. Chuyển hóa đơn sang mã bàn mới
+                boolean chuyenHD = hoaDonDAO.chuyenBan(tuBan.getMaBan(), denBan.getMaBan());
+
+                if (chuyenHD) {
+                    // 2. Đổi trạng thái bàn trong CSDL
+                    banAnDAO.capNhatTrangThai(tuBan.getMaBan(), "Trống");
+                    banAnDAO.capNhatTrangThai(denBan.getMaBan(), "Có khách");
+
+                    JOptionPane.showMessageDialog(this, "✅ Đã chuyển khách từ " + tuBan.getTenBan() + " sang " + denBan.getTenBan() + " thành công!");
+                    
+                    // 3. F5 màn hình Lễ Tân
+                    if (parentFrm != null) {
+                        parentFrm.refreshSoDoBan();
+                    }
+                    
+                    this.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "❌ Lỗi kết nối CSDL hoặc bàn chưa có hóa đơn chưa thanh toán!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
