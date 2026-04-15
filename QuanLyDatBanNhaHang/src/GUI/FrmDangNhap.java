@@ -12,6 +12,7 @@ import Entity.NhanVien;
 import connectDatabase.ConnectDB;
 import Entity.LuuLog;
 import Model.NhanVienModel;
+import DAO.NhatKyDangNhapDAO;
 
 public class FrmDangNhap extends JFrame {
 
@@ -284,7 +285,7 @@ public class FrmDangNhap extends JFrame {
 						btnDangNhap.setText("Đăng nhập");
 						return;
 					}
-					
+
 					String vaiTro = nhanVien.getVaiTro();
 					if (vaiTro == null || vaiTro.trim().isEmpty()) {
 						JOptionPane.showMessageDialog(FrmDangNhap.this, "Tài khoản chưa được gán vai trò.");
@@ -294,6 +295,8 @@ public class FrmDangNhap extends JFrame {
 					}
 
 					vaiTro = vaiTro.trim();
+					NhatKyDangNhapDAO logDAO = new NhatKyDangNhapDAO();
+					logDAO.ghiNhanDangNhap(nhanVien.getMaNV(), nhanVien.getHoTenNV(), vaiTro);
 					dispose(); // Đóng form đăng nhập
 
 					// Phân quyền theo chucVu từ DB

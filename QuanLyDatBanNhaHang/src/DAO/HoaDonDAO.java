@@ -200,88 +200,6 @@ public class HoaDonDAO {
 			}
 		}
 	}
-//    public boolean thanhToan(String maHD, double chietKhau, String maKM) {
-//        Connection con = null;
-//        try {
-//            con = getConnection();
-//            con.setAutoCommit(false);
-//
-//            double tongTienGoc = tinhTongTienChiTiet(con, maHD);
-//            double tongTienSauCK = tongTienGoc;
-//
-//            // Nếu chietKhau đang được hiểu là phần trăm thì tính theo %
-//            if (chietKhau > 0) {
-//                tongTienSauCK = tongTienGoc - (tongTienGoc * chietKhau / 100.0);
-//            }
-//
-//            if (tongTienSauCK < 0) {
-//                tongTienSauCK = 0;
-//            }
-//
-//            String sql1 = "UPDATE HoaDon " + "SET trangThaiThanhToan = N'Đã thanh toán', "
-//                    + "    ngayGioThanhToan = GETDATE(), " + "    chietKhau = ?, " + "    tongTien = ? "
-//                    + "WHERE maHD = ?";
-//
-//            PreparedStatement ps1 = con.prepareStatement(sql1);
-//            ps1.setDouble(1, chietKhau);
-//            ps1.setDouble(2, tongTienSauCK);
-//            ps1.setString(3, maHD);
-//            int r1 = ps1.executeUpdate();
-//            ps1.close();
-//
-//            String sql2 = "UPDATE BanAn SET trangThai = N'Trống' "
-//                    + "WHERE maBan = (SELECT maBan FROM HoaDon WHERE maHD = ?)";
-//            PreparedStatement ps2 = con.prepareStatement(sql2);
-//            ps2.setString(1, maHD);
-//            int r2 = ps2.executeUpdate();
-//            ps2.close();
-//
-//            // Nếu có mã KM thì lưu vào bảng HoaDonKhuyenMai
-//            if (maKM != null && !maKM.trim().isEmpty() && !"NONE".equalsIgnoreCase(maKM)) {
-//                double giaTriGiam = tongTienGoc - tongTienSauCK;
-//
-//                PreparedStatement psDelete = con.prepareStatement("DELETE FROM HoaDonKhuyenMai WHERE maHD = ?");
-//                psDelete.setString(1, maHD);
-//                psDelete.executeUpdate();
-//                psDelete.close();
-//
-//                PreparedStatement psInsert = con
-//                        .prepareStatement("INSERT INTO HoaDonKhuyenMai(maHD, maKM, giaTriGiam) VALUES (?, ?, ?)");
-//                psInsert.setString(1, maHD);
-//                psInsert.setString(2, maKM);
-//                psInsert.setDouble(3, giaTriGiam < 0 ? 0 : giaTriGiam);
-//                psInsert.executeUpdate();
-//                psInsert.close();
-//            }
-//
-//            if (r1 > 0 && r2 > 0) {
-//                con.commit();
-//                System.out.println("✅ Thanh toán & Giải phóng bàn thành công!");
-//                return true;
-//            } else {
-//                con.rollback();
-//                System.err.println("❌ Lỗi: Không tìm thấy hóa đơn hoặc bàn để cập nhật.");
-//                return false;
-//            }
-//
-//        } catch (SQLException e) {
-//            try {
-//                if (con != null)
-//                    con.rollback();
-//            } catch (SQLException ex) {
-//                ex.printStackTrace();
-//            }
-//            System.err.println("SQL Error: " + e.getMessage());
-//            return false;
-//        } finally {
-//            try {
-//                if (con != null)
-//                    con.setAutoCommit(true);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
 	// Hủy hóa đơn
 	public boolean huyHoaDon(String maHD) {
@@ -829,9 +747,7 @@ public class HoaDonDAO {
 		}
 	}
 
-	// =====================================================================
 	// PHỤC VỤ YÊU CẦU: CHUYỂN BÀN & GỘP BÀN
-	// =====================================================================
 
 	// 1. Chuyển bàn
 	public boolean chuyenBan(String maBanCu, String maBanMoi) {
@@ -941,4 +857,60 @@ public class HoaDonDAO {
 			}
 		}
 	}
+
+	public List<String[]> getDoanhThu7NgayGanNhat() {
+		List<String[]> list = new ArrayList<>();
+
+		String sql = "SELECT FORMAT(CAST(ngayGioThanhToan AS DATE), 'dd/MM') AS ngay, "
+				+ "       CAST(ISNULL(SUM(tongTien), 0) AS BIGINT) AS doanhThu " + "FROM HoaDon "
+				+ "WHERE trangThaiThanhToan = N'Đã thanh toán' "
+				+ "  AND CAST(ngayGioThanhToan AS DATE) >= CAST(DATEADD(DAY, -6, GETDATE()) AS DATE) "
+				+ "GROUP BY CAST(ngayGioThanhToan AS DATE) " + "ORDER BY CAST(ngayGioThanhToan AS DATE) ASC";
+
+		try {
+			Connection con = getConnection();
+			PreparedStatement ps = con.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				list.add(new String[] { rs.getString("ngay"), String.valueOf(rs.getLong("doanhThu")) });
+			}
+
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public List<String[]> getTop5MonBanChay() {
+		List<String[]> list = new ArrayList<>();
+
+		String sql = "SELECT TOP 5 m.tenMonAn, " + "       SUM(ct.soLuong) AS tongSoLuong, "
+				+ "       CAST(SUM(ct.thanhTien) AS BIGINT) AS tongDoanhThu " + "FROM ChiTietHoaDon ct "
+				+ "JOIN MonAn m ON ct.maMonAn = m.maMonAn " + "JOIN HoaDon h ON ct.maHD = h.maHD "
+				+ "WHERE h.trangThaiThanhToan = N'Đã thanh toán' " + "  AND ISNULL(ct.trangThaiPhucVu, N'') <> N'Hủy' "
+				+ "GROUP BY m.tenMonAn " + "ORDER BY SUM(ct.soLuong) DESC, SUM(ct.thanhTien) DESC";
+
+		try {
+			Connection con = getConnection();
+			PreparedStatement ps = con.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				list.add(new String[] { rs.getString("tenMonAn"), String.valueOf(rs.getInt("tongSoLuong")),
+						String.valueOf(rs.getLong("tongDoanhThu")) });
+			}
+
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
 }

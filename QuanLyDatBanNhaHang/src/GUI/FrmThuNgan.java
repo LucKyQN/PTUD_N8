@@ -48,11 +48,13 @@ public class FrmThuNgan extends JFrame {
 	private JTextField txtKhachDua;
 	private JLabel lbTienCoc;
 	private JLabel lbConPhaiThanhToan;
+	private JLabel lbTienHoanKhach;
 	private long tongCuoiCung = 0;
 	private long tienGiamHienTai = 0;
 	private long phiDichVuHienTai = 0;
 	private long vatHienTai = 0;
 	private long soTienCanThu = 0;
+	private long soTienHoanKhach = 0;
 
 	private JComboBox<String> cboKM_Current;
 	private List<String[]> dsKM_Current = new ArrayList<>();
@@ -314,6 +316,10 @@ public class FrmThuNgan extends JFrame {
 		lbConPhaiThanhToan = new JLabel("0 đ");
 		lbConPhaiThanhToan.setFont(new Font("Segoe UI", Font.BOLD, 24));
 		lbConPhaiThanhToan.setForeground(RED_MAIN);
+
+		lbTienHoanKhach = new JLabel("0 đ");
+		lbTienHoanKhach.setFont(new Font("Segoe UI", Font.BOLD, 18));
+		lbTienHoanKhach.setForeground(new Color(34, 197, 94));
 		lbTongTien.setFont(new Font("Segoe UI", Font.BOLD, 24));
 		lbTongTien.setForeground(RED_MAIN);
 
@@ -339,8 +345,8 @@ public class FrmThuNgan extends JFrame {
 		paper.add(createSummaryRow("VAT (10%):", lbVAT));
 		paper.add(createSummaryRow("Tổng cộng:", lbTongTien));
 		paper.add(createSummaryRow("Đã cọc:", lbTienCoc));
-		paper.add(Box.createVerticalStrut(10));
 		paper.add(createSummaryRow("Còn phải thanh toán:", lbConPhaiThanhToan));
+		paper.add(createSummaryRow("Hoàn lại khách:", lbTienHoanKhach));
 		paper.add(Box.createVerticalStrut(10));
 		paper.add(createSummaryRow("Khách đưa:", txtKhachDua));
 		paper.add(createSummaryRow("Tiền thừa trả khách:", lbTienThua));
@@ -380,6 +386,7 @@ public class FrmThuNgan extends JFrame {
 
 		long tienCoc = (banDangChon != null) ? banDangChon.tienCoc : 0;
 		soTienCanThu = Math.max(0, tongCuoiCung - tienCoc);
+		soTienHoanKhach = Math.max(0, tienCoc - tongCuoiCung);
 
 		lbGiamGia.setText("-" + formatTien(tienGiamHienTai) + " đ");
 		lbPhiDV.setText(formatTien(phiDichVuHienTai) + " đ");
@@ -387,12 +394,19 @@ public class FrmThuNgan extends JFrame {
 		lbTongTien.setText(formatTien(tongCuoiCung) + " đ");
 		lbTienCoc.setText("-" + formatTien(tienCoc) + " đ");
 		lbConPhaiThanhToan.setText(formatTien(soTienCanThu) + " đ");
+		lbTienHoanKhach.setText(formatTien(soTienHoanKhach) + " đ");
 
 		tinhTienThua();
 	}
 
 	private void tinhTienThua() {
 		try {
+			if (soTienCanThu == 0) {
+				lbTienThua.setText("0 đ");
+				lbTienThua.setForeground(new Color(0, 150, 0));
+				return;
+			}
+
 			String s = txtKhachDua.getText().trim().replace(".", "").replace(",", "");
 			if (s.isEmpty()) {
 				lbTienThua.setText("0 đ");
@@ -401,7 +415,6 @@ public class FrmThuNgan extends JFrame {
 			}
 
 			long khachDua = Long.parseLong(s);
-			//long thua = khachDua - tongCuoiCung;
 			long thua = khachDua - soTienCanThu;
 
 			if (thua < 0) {
@@ -440,47 +453,58 @@ public class FrmThuNgan extends JFrame {
 	}
 
 	private void xuLyThanhToan(BanAnModel ban) {
-		String s = txtKhachDua.getText().trim().replace(".", "").replace(",", "");
+		long khachDua = 0;
+		long tienThua = 0;
 
-		if (s.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Vui lòng nhập số tiền khách đưa.");
-			txtKhachDua.requestFocus();
-			return;
+		if (soTienCanThu > 0) {
+			String s = txtKhachDua.getText().trim().replace(".", "").replace(",", "");
+
+			if (s.isEmpty()) {
+				JOptionPane.showMessageDialog(this, "Vui lòng nhập số tiền khách đưa.");
+				txtKhachDua.requestFocus();
+				return;
+			}
+
+			try {
+				khachDua = Long.parseLong(s);
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(this, "Số tiền khách đưa không hợp lệ.");
+				txtKhachDua.requestFocus();
+				txtKhachDua.selectAll();
+				return;
+			}
+
+			if (khachDua <= 0) {
+				JOptionPane.showMessageDialog(this, "Số tiền khách đưa phải lớn hơn 0.");
+				txtKhachDua.requestFocus();
+				txtKhachDua.selectAll();
+				return;
+			}
+
+			if (khachDua < soTienCanThu) {
+				JOptionPane.showMessageDialog(this, "Khách đưa chưa đủ tiền để thanh toán.\n" + "Khách đưa: "
+						+ formatTien(khachDua) + " đ\n" + "Còn phải thanh toán: " + formatTien(soTienCanThu) + " đ");
+				txtKhachDua.requestFocus();
+				txtKhachDua.selectAll();
+				return;
+			}
+
+			tienThua = khachDua - soTienCanThu;
 		}
 
-		long khachDua;
-		try {
-			khachDua = Long.parseLong(s);
-		} catch (NumberFormatException ex) {
-			JOptionPane.showMessageDialog(this, "Số tiền khách đưa không hợp lệ.");
-			txtKhachDua.requestFocus();
-			txtKhachDua.selectAll();
-			return;
+		String msg;
+		if (soTienHoanKhach > 0) {
+			msg = "Xác nhận thanh toán cho " + ban.tenBan + "?\n\n" + "Tổng cộng: " + formatTien(tongCuoiCung) + " đ\n"
+					+ "Đã cọc: " + formatTien(ban.tienCoc) + " đ\n" + "Còn phải thanh toán: 0 đ\n" + "Hoàn lại khách: "
+					+ formatTien(soTienHoanKhach) + " đ";
+		} else {
+			msg = "Xác nhận thanh toán cho " + ban.tenBan + "?\n\n" + "Tổng cộng: " + formatTien(tongCuoiCung) + " đ\n"
+					+ "Đã cọc: " + formatTien(ban.tienCoc) + " đ\n" + "Còn phải thanh toán: " + formatTien(soTienCanThu)
+					+ " đ\n" + "Khách đưa: " + formatTien(khachDua) + " đ\n" + "Tiền thừa: " + formatTien(tienThua)
+					+ " đ";
 		}
 
-		if (khachDua <= 0) {
-			JOptionPane.showMessageDialog(this, "Số tiền khách đưa phải lớn hơn 0.");
-			txtKhachDua.requestFocus();
-			txtKhachDua.selectAll();
-			return;
-		}
-
-		if (khachDua < soTienCanThu) {
-			JOptionPane.showMessageDialog(this, "Khách đưa chưa đủ tiền để thanh toán.\n" + "Khách đưa: "
-					+ formatTien(khachDua) + " đ\n" + "Tổng cộng: " + formatTien(tongCuoiCung) + " đ");
-			txtKhachDua.requestFocus();
-			txtKhachDua.selectAll();
-			return;
-		}
-
-		long tienThua = khachDua - tongCuoiCung;
-
-		int opt = JOptionPane.showConfirmDialog(this,
-				"Xác nhận khách đã trả tiền cho " + ban.tenBan + "?\n" + "Khách đưa: " + formatTien(khachDua) + " đ\n"
-						+ "Tổng cộng: " + formatTien(tongCuoiCung) + " đ\n" + "Tiền thừa: " + formatTien(tienThua)
-						+ " đ",
-				"Thanh toán", JOptionPane.YES_NO_OPTION);
-
+		int opt = JOptionPane.showConfirmDialog(this, msg, "Thanh toán", JOptionPane.YES_NO_OPTION);
 		if (opt != JOptionPane.YES_OPTION) {
 			return;
 		}
@@ -619,8 +643,12 @@ public class FrmThuNgan extends JFrame {
 
 			document.add(new Paragraph("Tam tinh: " + formatTien(giaTriTamTinh) + " d", normalFont));
 			document.add(new Paragraph("Khuyen mai: " + tenKM + " (" + lbGiamGia.getText() + ")", normalFont));
+			document.add(new Paragraph("Phi dich vu: " + lbPhiDV.getText(), normalFont));
 			document.add(new Paragraph("VAT: " + lbVAT.getText(), normalFont));
 			document.add(new Paragraph("Tong cong: " + formatTien(tongCuoiCung) + " d", boldFont));
+			document.add(new Paragraph("Da coc: -" + formatTien(ban.tienCoc) + " d", normalFont));
+			document.add(new Paragraph("Con phai thanh toan: " + formatTien(soTienCanThu) + " d", boldFont));
+			document.add(new Paragraph("Hoan lai khach: " + formatTien(soTienHoanKhach) + " d", normalFont));
 			document.add(new Paragraph("Khach dua: " + formatTien(khachDua) + " d", normalFont));
 			document.add(new Paragraph("Tien thua: " + formatTien(tienThua) + " d", normalFont));
 
