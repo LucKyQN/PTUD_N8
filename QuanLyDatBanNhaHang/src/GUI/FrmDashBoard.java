@@ -1,7 +1,9 @@
 package GUI;
 
+import DAO.NhatKyDangNhapDAO;
 import Entity.NhanVien;
-
+import DAO.HoaDonDAO;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -41,6 +43,8 @@ public class FrmDashBoard extends JFrame {
 	private FrmQLSoDoBan pnlSoDoBan;
 	private final Map<String, JPanel> menuMap = new LinkedHashMap<>();
 	private String activeMenu = "Dashboard";
+	private final HoaDonDAO hoaDonDAO = new HoaDonDAO();
+	private final NhatKyDangNhapDAO nhatKyDangNhapDAO = new NhatKyDangNhapDAO();
 
 	public FrmDashBoard(NhanVien nhanVien) {
 		this.nhanVien = nhanVien;
@@ -324,13 +328,13 @@ public class FrmDashBoard extends JFrame {
 		pnlKhuyenMai = new FrmQLKhuyenMai();
 		pnlBaoCao = new FrmBaoCaoDoanhThu();
 		pnlSoDoBan = new FrmQLSoDoBan();
-		contentPanel.add(pnlSoDoBan, "SODOBAN");
 		contentPanel.add(dashboardPanel, "DASHBOARD");
 		contentPanel.add(pnlNhanVien, "NHANVIEN");
 		contentPanel.add(pnlMonAn, "MONAN");
 		contentPanel.add(pnlBanAn, "BANAN");
 		contentPanel.add(pnlKhuyenMai, "KHUYENMAI");
 		contentPanel.add(pnlBaoCao, "BAOCAO");
+		contentPanel.add(pnlSoDoBan, "SODOBAN");
 
 		main.add(contentPanel, BorderLayout.CENTER);
 		return main;
@@ -414,10 +418,22 @@ public class FrmDashBoard extends JFrame {
 		cardsRow.setOpaque(false);
 		cardsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
 
-		cardsRow.add(createStatCard("💰", "Doanh thu hôm nay", "14.200.000đ", "+12.5%", true, new Color(34, 197, 94)));
-		cardsRow.add(createStatCard("🛒", "Tổng đơn hàng", "48", "+8.2%", true, new Color(99, 102, 241)));
-		cardsRow.add(createStatCard("👤", "Nhân viên đang làm", "12", "", false, new Color(168, 85, 247)));
-		cardsRow.add(createStatCard("⚠", "Tỷ lệ hủy", "2.3%", "-0.5%", false, new Color(251, 146, 60)));
+		long doanhThuHomNay = hoaDonDAO.getDoanhThuHomNay();
+		int tongDonHomNay = hoaDonDAO.getTongDonHomNay();
+		int soNhanVienDangLam = hoaDonDAO.getSoNhanVienDangLam();
+		double tyLeHuy = hoaDonDAO.getTyLeHuy();
+
+		cardsRow.add(createStatCard("💰", "Doanh thu hôm nay", formatTien(doanhThuHomNay) + "đ", "", false,
+				new Color(34, 197, 94)));
+
+		cardsRow.add(createStatCard("🛒", "Tổng đơn hàng", String.valueOf(tongDonHomNay), "", false,
+				new Color(99, 102, 241)));
+
+		cardsRow.add(createStatCard("👤", "Nhân viên đang làm", String.valueOf(soNhanVienDangLam), "", false,
+				new Color(168, 85, 247)));
+
+		cardsRow.add(
+				createStatCard("⚠", "Tỷ lệ hủy", String.format("%.1f%%", tyLeHuy), "", false, new Color(251, 146, 60)));
 
 		content.add(cardsRow);
 		content.add(Box.createVerticalStrut(18));
@@ -426,13 +442,16 @@ public class FrmDashBoard extends JFrame {
 		chartsRow.setOpaque(false);
 		chartsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 280));
 
-		chartsRow.add(createChartPlaceholder("📊  Doanh thu 7 ngày qua", "Biểu đồ cột sẽ hiển thị tại đây"));
-		chartsRow.add(createChartPlaceholder("🥧  Món ăn bán chạy nhất", "Biểu đồ tròn sẽ hiển thị tại đây"));
+		List<String[]> dsDoanhThu7Ngay = hoaDonDAO.getDoanhThu7NgayGanNhat();
+		List<String[]> dsTopMon = hoaDonDAO.getTop5MonBanChay();
+
+		chartsRow.add(createRevenueChartCard("Doanh thu 7 ngày qua", dsDoanhThu7Ngay));
+		chartsRow.add(createTopMonCard("Món ăn bán chạy nhất", dsTopMon));
 
 		content.add(chartsRow);
 		content.add(Box.createVerticalStrut(18));
 
-		content.add(createShiftTable());
+		content.add(createLoginTodayTable());
 
 		return content;
 	}
@@ -543,29 +562,30 @@ public class FrmDashBoard extends JFrame {
 		return card;
 	}
 
-	private JPanel createShiftTable() {
+	private JPanel createLoginTodayTable() {
 		JPanel card = new JPanel(new BorderLayout());
 		card.setBackground(Color.WHITE);
 		card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
 		card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(BORDER_CLR, 1, true),
 				new EmptyBorder(16, 18, 16, 18)));
 
-		JLabel lbTitle = new JLabel("📋  Quản lý ca làm việc");
+		JLabel lbTitle = new JLabel("Nhân viên đã đăng nhập hôm nay");
 		lbTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
 		lbTitle.setForeground(TEXT_DARK);
 		lbTitle.setBorder(new EmptyBorder(0, 0, 12, 0));
 
-		String[] cols = { "Thu ngân", "Ca làm", "Trạng thái", "Giờ bắt đầu", "Tiền trong két", "Chênh lệch" };
-		Object[][] data = { { "Nguyễn Văn A", "Ca sáng", "Đang mở", "07:00", "5.200.000đ", "0đ" },
-				{ "Trần Thị B", "Ca chiều", "Đang mở", "14:00", "8.500.000đ", "+50.000đ" },
-				{ "Lê Văn C", "Ca tối", "Chưa mở", "18:00", "-", "-" } };
-
-		DefaultTableModel model = new DefaultTableModel(data, cols) {
+		String[] cols = { "Mã NV", "Họ tên", "Vai trò", "Giờ đăng nhập" };
+		DefaultTableModel model = new DefaultTableModel(cols, 0) {
 			@Override
 			public boolean isCellEditable(int r, int c) {
 				return false;
 			}
 		};
+
+		List<String[]> ds = nhatKyDangNhapDAO.getDanhSachDangNhapHomNay();
+		for (String[] row : ds) {
+			model.addRow(row);
+		}
 
 		JTable table = new JTable(model);
 		table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -600,53 +620,6 @@ public class FrmDashBoard extends JFrame {
 			}
 		});
 
-		table.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
-			@Override
-			public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row,
-					int col) {
-				JPanel wrap = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-				wrap.setBackground(row % 2 == 0 ? Color.WHITE : new Color(250, 250, 250));
-
-				JLabel badge = new JLabel(" " + val + " ");
-				badge.setFont(new Font("Segoe UI", Font.BOLD, 11));
-				badge.setOpaque(true);
-				badge.setBorder(new EmptyBorder(3, 8, 3, 8));
-
-				if ("Đang mở".equals(val)) {
-					badge.setBackground(new Color(220, 252, 231));
-					badge.setForeground(new Color(22, 163, 74));
-				} else {
-					badge.setBackground(new Color(243, 244, 246));
-					badge.setForeground(TEXT_GRAY);
-				}
-
-				wrap.add(badge);
-				return wrap;
-			}
-		});
-
-		table.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
-			@Override
-			public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row,
-					int col) {
-				super.getTableCellRendererComponent(t, val, sel, foc, row, col);
-				String v = val.toString();
-				setBackground(row % 2 == 0 ? Color.WHITE : new Color(250, 250, 250));
-				setFont(new Font("Segoe UI", Font.BOLD, 13));
-				setBorder(new EmptyBorder(0, 8, 0, 8));
-
-				if (v.startsWith("+")) {
-					setForeground(new Color(22, 163, 74));
-				} else if (v.startsWith("-") && !v.equals("-")) {
-					setForeground(RED_MAIN);
-				} else {
-					setForeground(TEXT_GRAY);
-				}
-
-				return this;
-			}
-		});
-
 		JScrollPane tableScroll = new JScrollPane(table);
 		tableScroll.setBorder(BorderFactory.createLineBorder(BORDER_CLR));
 		tableScroll.getViewport().setBackground(Color.WHITE);
@@ -655,5 +628,160 @@ public class FrmDashBoard extends JFrame {
 		card.add(tableScroll, BorderLayout.CENTER);
 
 		return card;
+	}
+
+	private JPanel createRevenueChartCard(String title, List<String[]> data) {
+		JPanel card = new JPanel(new BorderLayout());
+		card.setBackground(Color.WHITE);
+		card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(BORDER_CLR, 1, true),
+				new EmptyBorder(16, 18, 16, 18)));
+
+		JLabel lbTitle = new JLabel(title);
+		lbTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+		lbTitle.setForeground(TEXT_DARK);
+		lbTitle.setBorder(new EmptyBorder(0, 0, 12, 0));
+
+		JPanel chartPanel = new JPanel() {
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+				int w = getWidth();
+				int h = getHeight();
+				int left = 45;
+				int right = 20;
+				int top = 20;
+				int bottom = 40;
+
+				g2.setColor(new Color(245, 245, 245));
+				g2.fillRoundRect(0, 0, w, h, 12, 12);
+
+				if (data == null || data.isEmpty()) {
+					g2.setColor(new Color(160, 160, 160));
+					g2.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+					String msg = "Chưa có dữ liệu";
+					FontMetrics fm = g2.getFontMetrics();
+					g2.drawString(msg, (w - fm.stringWidth(msg)) / 2, h / 2);
+					g2.dispose();
+					return;
+				}
+
+				long max = 1;
+				for (String[] row : data) {
+					long val = Long.parseLong(row[1]);
+					if (val > max)
+						max = val;
+				}
+
+				g2.setColor(new Color(210, 210, 210));
+				g2.drawLine(left, h - bottom, w - right, h - bottom);
+				g2.drawLine(left, top, left, h - bottom);
+
+				int count = data.size();
+				int availableWidth = w - left - right - 20;
+				int barGap = 18;
+				int barWidth = Math.max(30, (availableWidth - (count - 1) * barGap) / count);
+
+				for (int i = 0; i < count; i++) {
+					String ngay = data.get(i)[0];
+					long doanhThu = Long.parseLong(data.get(i)[1]);
+
+					int x = left + 10 + i * (barWidth + barGap);
+					int barHeight = (int) ((double) doanhThu / max * (h - top - bottom - 20));
+					int y = h - bottom - barHeight;
+
+					g2.setColor(new Color(220, 38, 38));
+					g2.fillRoundRect(x, y, barWidth, barHeight, 8, 8);
+
+					g2.setColor(TEXT_DARK);
+					g2.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+					FontMetrics fm = g2.getFontMetrics();
+					g2.drawString(ngay, x + (barWidth - fm.stringWidth(ngay)) / 2, h - 15);
+
+					String valueText = formatTien(doanhThu);
+					g2.setColor(new Color(90, 90, 90));
+					g2.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+					FontMetrics fm2 = g2.getFontMetrics();
+					g2.drawString(valueText, x + (barWidth - fm2.stringWidth(valueText)) / 2, y - 5);
+				}
+
+				g2.dispose();
+			}
+		};
+
+		chartPanel.setPreferredSize(new Dimension(0, 220));
+		chartPanel.setOpaque(false);
+
+		card.add(lbTitle, BorderLayout.NORTH);
+		card.add(chartPanel, BorderLayout.CENTER);
+		return card;
+	}
+
+	private JPanel createTopMonCard(String title, List<String[]> data) {
+		JPanel card = new JPanel(new BorderLayout());
+		card.setBackground(Color.WHITE);
+		card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(BORDER_CLR, 1, true),
+				new EmptyBorder(16, 18, 16, 18)));
+
+		JLabel lbTitle = new JLabel(title);
+		lbTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+		lbTitle.setForeground(TEXT_DARK);
+		lbTitle.setBorder(new EmptyBorder(0, 0, 12, 0));
+
+		String[] cols = { "Tên món", "SL bán", "Doanh thu" };
+		DefaultTableModel model = new DefaultTableModel(cols, 0) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+
+		if (data != null) {
+			for (String[] row : data) {
+				model.addRow(new Object[] { row[0], row[1], formatTien(Long.parseLong(row[2])) + "đ" });
+			}
+		}
+
+		JTable table = new JTable(model);
+		table.setRowHeight(36);
+		table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		table.setShowGrid(false);
+		table.setIntercellSpacing(new Dimension(0, 0));
+		table.setBackground(Color.WHITE);
+		table.setFocusable(false);
+
+		JTableHeader header = table.getTableHeader();
+		header.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		header.setBackground(Color.WHITE);
+		header.setForeground(TEXT_GRAY);
+		header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_CLR));
+		header.setPreferredSize(new Dimension(0, 34));
+
+		table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+			@Override
+			public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row,
+					int col) {
+				Component c = super.getTableCellRendererComponent(t, val, sel, foc, row, col);
+				c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(250, 250, 250));
+				setBorder(new EmptyBorder(0, 8, 0, 8));
+				setForeground(TEXT_DARK);
+				setFont(new Font("Segoe UI", Font.PLAIN, 13));
+				return c;
+			}
+		});
+
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setBorder(BorderFactory.createLineBorder(BORDER_CLR));
+		scroll.getViewport().setBackground(Color.WHITE);
+
+		card.add(lbTitle, BorderLayout.NORTH);
+		card.add(scroll, BorderLayout.CENTER);
+		return card;
+	}
+
+	private String formatTien(long soTien) {
+		return String.format("%,d", soTien).replace(",", ".");
 	}
 }
