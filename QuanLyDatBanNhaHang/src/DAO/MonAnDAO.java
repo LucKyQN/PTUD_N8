@@ -13,238 +13,216 @@ import java.util.List;
 
 public class MonAnDAO {
 
-    private Connection getConnection() throws Exception {
-        ConnectDB.getInstance().connect();
-        return ConnectDB.getInstance().getConnection();
-    }
+	private Connection getConnection() throws Exception {
+		ConnectDB.getInstance().connect();
+		return ConnectDB.getInstance().getConnection();
+	}
 
-    public List<DanhMuc> getAllDanhMuc() {
-        List<DanhMuc> list = new ArrayList<>();
-        String sql = "SELECT maDM, tenDM FROM DanhMucMonAn ORDER BY maDM";
+	public List<DanhMuc> getAllDanhMuc() {
+		List<DanhMuc> list = new ArrayList<>();
+		String sql = "SELECT maDM, tenDM FROM DanhMucMonAn ORDER BY maDM";
 
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()) {
-                DanhMuc dm = new DanhMuc();
-                dm.setMaDM(rs.getString("maDM"));
-                dm.setTenDM(rs.getString("tenDM"));
-                list.add(dm);
-            }
+			while (rs.next()) {
+				DanhMuc dm = new DanhMuc();
+				dm.setMaDM(rs.getString("maDM"));
+				dm.setTenDM(rs.getString("tenDM"));
+				list.add(dm);
+			}
 
-            rs.close();
-            stmt.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			rs.close();
+			stmt.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return list;
-    }
+		return list;
+	}
 
-    public List<MonAn> getAllMonAn() {
-        List<MonAn> list = new ArrayList<>();
+	public List<MonAn> getAllMonAn() {
+		List<MonAn> list = new ArrayList<>();
 
-        String sql =
-                "SELECT m.maMonAn, m.maDM, d.tenDM, m.tenMonAn, m.donVi, m.soLuongTon, m.giaBan, " +
-                "       m.moTa, m.ghiChu, m.anhMon, m.tinhTrang " +
-                "FROM MonAn m " +
-                "LEFT JOIN DanhMucMonAn d ON m.maDM = d.maDM " +
-                "WHERE m.tinhTrang = 1 " +
-                "ORDER BY m.maMonAn";
+		String sql = "SELECT m.maMonAn, m.maDM, d.tenDM, m.tenMonAn, m.donVi, m.soLuongTon, m.giaBan, "
+				+ "       m.moTa, m.ghiChu, m.anhMon, m.tinhTrang " + "FROM MonAn m "
+				+ "LEFT JOIN DanhMucMonAn d ON m.maDM = d.maDM " + "WHERE m.tinhTrang = 1 " + "ORDER BY m.maMonAn";
 
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()) {
-                list.add(mapMonAn(rs));
-            }
+			while (rs.next()) {
+				list.add(mapMonAn(rs));
+			}
 
-            rs.close();
-            stmt.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			rs.close();
+			stmt.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return list;
-    }
+		return list;
+	}
 
-    public boolean themMonAn(MonAn mon) {
-        String sql =
-                "INSERT INTO MonAn (maMonAn, maDM, tenMonAn, donVi, soLuongTon, giaBan, moTa, ghiChu, anhMon, tinhTrang) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	public boolean themMonAn(MonAn mon) {
+		String sql = "INSERT INTO MonAn (maMonAn, maDM, tenMonAn, donVi, soLuongTon, giaBan, moTa, ghiChu, anhMon, tinhTrang) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
 
-            stmt.setString(1, mon.getMaMonAn());
+			stmt.setString(1, mon.getMaMonAn());
 
-            if (mon.getDanhMuc() != null && mon.getDanhMuc().getMaDM() != null && !mon.getDanhMuc().getMaDM().trim().isEmpty()) {
-                stmt.setString(2, mon.getDanhMuc().getMaDM());
-            } else {
-                stmt.setNull(2, Types.VARCHAR);
-            }
+			if (mon.getDanhMuc() != null && mon.getDanhMuc().getMaDM() != null
+					&& !mon.getDanhMuc().getMaDM().trim().isEmpty()) {
+				stmt.setString(2, mon.getDanhMuc().getMaDM());
+			} else {
+				stmt.setNull(2, Types.VARCHAR);
+			}
 
-            stmt.setString(3, mon.getTenMon());
-            stmt.setString(4, mon.getDonVi());
-            stmt.setInt(5, mon.getSoLuong());
-            stmt.setDouble(6, mon.getGiaMon());
-            stmt.setString(7, mon.getMoTa());
-            stmt.setString(8, mon.getGhiChu());
-            stmt.setString(9, mon.getAnhMon());
-            stmt.setBoolean(10, mon.isTinhTrang());
+			stmt.setString(3, mon.getTenMon());
+			stmt.setString(4, mon.getDonVi());
+			stmt.setInt(5, mon.getSoLuong());
+			stmt.setDouble(6, mon.getGiaMon());
+			stmt.setString(7, mon.getMoTa());
+			stmt.setString(8, mon.getGhiChu());
+			stmt.setString(9, mon.getAnhMon());
+			stmt.setBoolean(10, mon.isTinhTrang());
 
-            int rows = stmt.executeUpdate();
-            stmt.close();
+			int rows = stmt.executeUpdate();
+			stmt.close();
 
-            return rows > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			return rows > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
-    public boolean suaMonAn(MonAn mon) {
-        String sql =
-                "UPDATE MonAn SET maDM = ?, tenMonAn = ?, donVi = ?, soLuongTon = ?, giaBan = ?, " +
-                "moTa = ?, ghiChu = ?, anhMon = ?, tinhTrang = ? " +
-                "WHERE maMonAn = ?";
+	public boolean suaMonAn(MonAn mon) {
+		String sql = "UPDATE MonAn SET maDM = ?, tenMonAn = ?, donVi = ?, soLuongTon = ?, giaBan = ?, "
+				+ "moTa = ?, ghiChu = ?, anhMon = ?, tinhTrang = ? " + "WHERE maMonAn = ?";
 
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
 
-            if (mon.getDanhMuc() != null && mon.getDanhMuc().getMaDM() != null && !mon.getDanhMuc().getMaDM().trim().isEmpty()) {
-                stmt.setString(1, mon.getDanhMuc().getMaDM());
-            } else {
-                stmt.setNull(1, Types.VARCHAR);
-            }
+			if (mon.getDanhMuc() != null && mon.getDanhMuc().getMaDM() != null
+					&& !mon.getDanhMuc().getMaDM().trim().isEmpty()) {
+				stmt.setString(1, mon.getDanhMuc().getMaDM());
+			} else {
+				stmt.setNull(1, Types.VARCHAR);
+			}
 
-            stmt.setString(2, mon.getTenMon());
-            stmt.setString(3, mon.getDonVi());
-            stmt.setInt(4, mon.getSoLuong());
-            stmt.setDouble(5, mon.getGiaMon());
-            stmt.setString(6, mon.getMoTa());
-            stmt.setString(7, mon.getGhiChu());
-            stmt.setString(8, mon.getAnhMon());
-            stmt.setBoolean(9, mon.isTinhTrang());
-            stmt.setString(10, mon.getMaMonAn());
+			stmt.setString(2, mon.getTenMon());
+			stmt.setString(3, mon.getDonVi());
+			stmt.setInt(4, mon.getSoLuong());
+			stmt.setDouble(5, mon.getGiaMon());
+			stmt.setString(6, mon.getMoTa());
+			stmt.setString(7, mon.getGhiChu());
+			stmt.setString(8, mon.getAnhMon());
+			stmt.setBoolean(9, mon.isTinhTrang());
+			stmt.setString(10, mon.getMaMonAn());
 
-            int rows = stmt.executeUpdate();
-            stmt.close();
+			int rows = stmt.executeUpdate();
+			stmt.close();
 
-            return rows > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			return rows > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
-    public boolean xoaMemMonAn(String maMonAn) {
-        String sql = "UPDATE MonAn SET tinhTrang = 0 WHERE maMonAn = ?";
+	public boolean xoaMemMonAn(String maMonAn) {
+		String sql = "UPDATE MonAn SET tinhTrang = 0 WHERE maMonAn = ?";
 
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maMonAn);
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
+			stmt.setString(1, maMonAn);
 
-            int rows = stmt.executeUpdate();
-            stmt.close();
+			int rows = stmt.executeUpdate();
+			stmt.close();
 
-            return rows > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
- // HÀM MỚI: XÓA HOÀN TOÀN KHỎI DATABASE
-    public boolean xoaHoanToanMonAn(String maMonAn) {
-        String sql = "DELETE FROM MonAn WHERE maMonAn = ?";
+			return rows > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	// HÀM MỚI: XÓA HOÀN TOÀN KHỎI DATABASE
 
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maMonAn);
+	public boolean tonTaiMaMonAn(String maMonAn) {
+		String sql = "SELECT COUNT(*) FROM MonAn WHERE maMonAn = ?";
 
-            int rows = stmt.executeUpdate();
-            stmt.close();
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
+			stmt.setString(1, maMonAn);
 
-            return rows > 0;
-        } catch (Exception e) {
-            System.err.println("Lỗi xóa hoàn toàn (có thể do dính khóa ngoại): " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-    public boolean tonTaiMaMonAn(String maMonAn) {
-        String sql = "SELECT COUNT(*) FROM MonAn WHERE maMonAn = ?";
+			ResultSet rs = stmt.executeQuery();
+			boolean exists = false;
+			if (rs.next()) {
+				exists = rs.getInt(1) > 0;
+			}
 
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maMonAn);
+			rs.close();
+			stmt.close();
+			return exists;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
-            ResultSet rs = stmt.executeQuery();
-            boolean exists = false;
-            if (rs.next()) {
-                exists = rs.getInt(1) > 0;
-            }
+	private MonAn mapMonAn(ResultSet rs) throws Exception {
+		MonAn mon = new MonAn();
+		mon.setMaMonAn(rs.getString("maMonAn"));
+		mon.setTenMon(rs.getString("tenMonAn"));
+		mon.setDonVi(rs.getString("donVi"));
+		mon.setSoLuong(rs.getInt("soLuongTon"));
+		mon.setGiaMon(rs.getDouble("giaBan"));
+		mon.setMoTa(rs.getString("moTa"));
+		mon.setGhiChu(rs.getString("ghiChu"));
+		mon.setAnhMon(rs.getString("anhMon"));
+		mon.setTinhTrang(rs.getBoolean("tinhTrang"));
 
-            rs.close();
-            stmt.close();
-            return exists;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+		String maDM = rs.getString("maDM");
+		String tenDM = rs.getString("tenDM");
+		if (maDM != null) {
+			DanhMuc dm = new DanhMuc();
+			dm.setMaDM(maDM);
+			dm.setTenDM(tenDM);
+			mon.setDanhMuc(dm);
+		}
 
-    private MonAn mapMonAn(ResultSet rs) throws Exception {
-        MonAn mon = new MonAn();
-        mon.setMaMonAn(rs.getString("maMonAn"));
-        mon.setTenMon(rs.getString("tenMonAn"));
-        mon.setDonVi(rs.getString("donVi"));
-        mon.setSoLuong(rs.getInt("soLuongTon"));
-        mon.setGiaMon(rs.getDouble("giaBan"));
-        mon.setMoTa(rs.getString("moTa"));
-        mon.setGhiChu(rs.getString("ghiChu"));
-        mon.setAnhMon(rs.getString("anhMon"));
-        mon.setTinhTrang(rs.getBoolean("tinhTrang"));
+		return mon;
+	}
 
-        String maDM = rs.getString("maDM");
-        String tenDM = rs.getString("tenDM");
-        if (maDM != null) {
-            DanhMuc dm = new DanhMuc();
-            dm.setMaDM(maDM);
-            dm.setTenDM(tenDM);
-            mon.setDanhMuc(dm);
-        }
-
-        return mon;
-    }
-    public String getMaMonTuDong() {
-        String maMoi = "MA001"; // Mặc định nếu bảng trống
-        // Lấy mã có số thứ tự lớn nhất
-        String sql = "SELECT TOP 1 maMonAn FROM MonAn ORDER BY maMonAn DESC";
-        try {
-            Connection con = getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                String maCu = rs.getString("maMonAn"); // Ví dụ: "MA010"
-                // Tách phần số ra (bỏ 2 chữ cái đầu "MA")
-                int so = Integer.parseInt(maCu.substring(2)) + 1;
-                // Format lại thành MA + 3 chữ số (ví dụ: MA011)
-                maMoi = String.format("MA%03d", so);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return maMoi;
-    }
+	public String getMaMonTuDong() {
+		String maMoi = "MA001"; // Mặc định nếu bảng trống
+		// Lấy mã có số thứ tự lớn nhất
+		String sql = "SELECT TOP 1 maMonAn FROM MonAn ORDER BY maMonAn DESC";
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				String maCu = rs.getString("maMonAn"); // Ví dụ: "MA010"
+				// Tách phần số ra (bỏ 2 chữ cái đầu "MA")
+				int so = Integer.parseInt(maCu.substring(2)) + 1;
+				// Format lại thành MA + 3 chữ số (ví dụ: MA011)
+				maMoi = String.format("MA%03d", so);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return maMoi;
+	}
 }
-

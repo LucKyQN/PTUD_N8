@@ -34,13 +34,12 @@ public class FrmQLBanAn extends JPanel {
 		root.setBorder(new EmptyBorder(20, 24, 24, 24));
 
 		root.add(createTopBar(), BorderLayout.NORTH);
-		// Xóa SplitPane, đưa bảng lên chiếm toàn bộ CENTER
 		root.add(createTablePanel(), BorderLayout.CENTER);
 
 		add(root, BorderLayout.CENTER);
 	}
 
-	// TOP BAR 
+	// TOP BAR
 	private JPanel createTopBar() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBackground(Color.WHITE);
@@ -55,15 +54,12 @@ public class FrmQLBanAn extends JPanel {
 
 		JButton btnThem = new JButton("Thêm");
 		JButton btnSua = new JButton("Sửa");
-		JButton btnXoaMem = new JButton("Xóa mềm");
-		JButton btnXoaHoanToan = new JButton("Xóa hoàn toàn"); // Nút mới
+		JButton btnXoaMem = new JButton("Xóa");
 
 		btnThem.addActionListener(e -> moDialogThem());
 		btnSua.addActionListener(e -> moDialogSua());
 		btnXoaMem.addActionListener(e -> xoaMemBanAn());
-		btnXoaHoanToan.addActionListener(e -> xoaHoanToanBanAn()); // Sự kiện nút mới
 
-		btnPanel.add(btnXoaHoanToan); // Thay nút Làm mới
 		btnPanel.add(btnXoaMem);
 		btnPanel.add(btnSua);
 		btnPanel.add(btnThem);
@@ -74,7 +70,7 @@ public class FrmQLBanAn extends JPanel {
 		return panel;
 	}
 
-	// BẢNG QUẢN LÝ BÀN 
+	// BẢNG QUẢN LÝ BÀN
 	private JPanel createTablePanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBackground(Color.WHITE);
@@ -123,10 +119,10 @@ public class FrmQLBanAn extends JPanel {
 		return panel;
 	}
 
-	// LOAD TABLE 
+	// LOAD TABLE
 	private void loadTable() {
 		model.setRowCount(0);
-		dsBanAn = dao.getAllBanAn();
+		dsBanAn = dao.getDanhSachBanDangSuDung();
 
 		for (BanAn ban : dsBanAn) {
 			model.addRow(new Object[] { ban.getMaBan(), ban.getTenBan(),
@@ -142,7 +138,7 @@ public class FrmQLBanAn extends JPanel {
 		return dsBanAn.get(row);
 	}
 
-	//  DIALOG CHI TIẾT (Đúp chuột)
+	// DIALOG CHI TIẾT (Đúp chuột)
 	private void moDialogChiTiet(BanAn ban) {
 		Window window = SwingUtilities.getWindowAncestor(this);
 		Frame owner = window instanceof Frame ? (Frame) window : null;
@@ -187,15 +183,15 @@ public class FrmQLBanAn extends JPanel {
 		txtMoTa.setWrapStyleWord(true);
 		txtMoTa.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 		// Xóa con trỏ nhấp nháy
-		txtMoTa.setFocusable(false); 
+		txtMoTa.setFocusable(false);
 		// Làm trong suốt màu nền
 		txtMoTa.setOpaque(false);
-		
+
 		JScrollPane scrollMoTa = new JScrollPane(txtMoTa);
 		scrollMoTa.setPreferredSize(new Dimension(100, 70));
 		scrollMoTa.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		scrollMoTa.setBorder(null);
-		
+
 		textPanel.add(lblMoTa, BorderLayout.NORTH);
 		textPanel.add(scrollMoTa, BorderLayout.CENTER);
 
@@ -232,7 +228,7 @@ public class FrmQLBanAn extends JPanel {
 		return p;
 	}
 
-	//  CRUD ACTIONS
+	// CRUD ACTIONS
 	private void moDialogThem() {
 		Window window = SwingUtilities.getWindowAncestor(this);
 		Frame owner = window instanceof Frame ? (Frame) window : null;
@@ -275,30 +271,7 @@ public class FrmQLBanAn extends JPanel {
 		}
 	}
 
-	private void xoaHoanToanBanAn() {
-		BanAn ban = getBanDangChon();
-		if (ban == null) {
-			JOptionPane.showMessageDialog(this, "Vui lòng chọn bàn cần xóa hoàn toàn.");
-			return;
-		}
-		int confirm = JOptionPane.showConfirmDialog(this,
-				"CẢNH BÁO: Xóa hoàn toàn bàn " + ban.getMaBan() + " - " + ban.getTenBan() + "?\n"
-						+ "Hành động này sẽ xóa dữ liệu vĩnh viễn và không thể hoàn tác!",
-				"Xóa hoàn toàn bàn", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
-		if (confirm != JOptionPane.YES_OPTION)
-			return;
-
-		if (dao.xoaHoanToanBanAn(ban.getMaBan())) {
-			JOptionPane.showMessageDialog(this, "Đã xóa hoàn toàn bàn khỏi cơ sở dữ liệu.");
-			loadTable();
-		} else {
-			JOptionPane.showMessageDialog(this, "Xóa thất bại! Bàn này có thể đang liên kết với dữ liệu hóa đơn.",
-					"Lỗi", JOptionPane.ERROR_MESSAGE);
-		}
-	}
-
-	// ==================== DIALOG THÊM / SỬA ====================
+	// DIALOG THÊM / SỬA
 	static class BanAnDialog extends JDialog {
 
 		private final BanAnDAO dao;
@@ -309,11 +282,11 @@ public class FrmQLBanAn extends JPanel {
 		private JTextField txtTenBan;
 		private JComboBox<LoaiBan> cboLoaiBan;
 		private JComboBox<String> cboTrangThai;
-		
+
 		// Đổi thành JComboBox
 		private JComboBox<String> cboViTri;
 		private JComboBox<String> cboSucChua;
-		
+
 		private JTextArea txtMoTa;
 
 		public BanAnDialog(Frame owner, BanAnDAO dao, BanAn banSua) {
@@ -323,8 +296,11 @@ public class FrmQLBanAn extends JPanel {
 
 			setTitle(banSua == null ? "Thêm bàn ăn" : "Sửa bàn ăn");
 			initUI();
-			if (banSua != null)
+			if (banSua != null) {
 				doDuLieuLenForm();
+			} else {
+				txtMaBan.setText(dao.taoMaBanTuDong());
+			}
 
 			pack();
 			setSize(800, 420);
@@ -344,6 +320,8 @@ public class FrmQLBanAn extends JPanel {
 			fields.setOpaque(false);
 
 			txtMaBan = new JTextField();
+			txtMaBan.setEditable(false);
+			txtMaBan.setBackground(new Color(245, 245, 245));
 			txtTenBan = new JTextField();
 			cboLoaiBan = new JComboBox<>();
 			loadLoaiBanToCombo();
@@ -361,31 +339,32 @@ public class FrmQLBanAn extends JPanel {
 				}
 			});
 
-			cboTrangThai = new JComboBox<>(new String[] { "Trống", "Đang phục vụ", "Đã đặt", "Ngưng sử dụng" });
+			cboTrangThai = new JComboBox<>(new String[] { "Trống", "Có khách", "Đã đặt", "Ngưng sử dụng" });
 			if (banSua == null) {
-			    // Nếu là THÊM MỚI: Khóa cứng là "Trống"
-			    cboTrangThai.setSelectedItem("Trống");
-			    cboTrangThai.setEnabled(false); 
+				// Nếu là THÊM MỚI: Khóa cứng là "Trống"
+				cboTrangThai.setSelectedItem("Trống");
+				cboTrangThai.setEnabled(false);
 			} else {
-			    // Nếu là SỬA: Kiểm tra trạng thái hiện tại
-			    String ttHienTai = banSua.getTrangThai();
-			    
-			    if (ttHienTai.equals("Đang phục vụ") || ttHienTai.equals("Đã đặt")) {
-			        // Bàn đang vướng nghiệp vụ của Lễ tân/Phục vụ -> Ép hiển thị đúng trạng thái đó và KHÓA không cho Quản lý sửa
-			        cboTrangThai.removeAllItems();
-			        cboTrangThai.addItem(ttHienTai);
-			        cboTrangThai.setEnabled(false);
-			    } else {
-			        // Bàn đang Trống hoặc Ngưng sử dụng -> Quản lý được phép đóng/mở bàn
-			        cboTrangThai.setSelectedItem(ttHienTai);
-			        cboTrangThai.setEnabled(true);
-			    }
+				// Nếu là SỬA: Kiểm tra trạng thái hiện tại
+				String ttHienTai = banSua.getTrangThai();
+
+				if (ttHienTai.equals("Có khách") || ttHienTai.equals("Đã đặt")) {
+					// Bàn đang vướng nghiệp vụ của Lễ tân/Phục vụ -> Ép hiển thị đúng trạng thái đó
+					// và KHÓA không cho Quản lý sửa
+					cboTrangThai.removeAllItems();
+					cboTrangThai.addItem(ttHienTai);
+					cboTrangThai.setEnabled(false);
+				} else {
+					// Bàn đang Trống hoặc Ngưng sử dụng -> Quản lý được phép đóng/mở bàn
+					cboTrangThai.setSelectedItem(ttHienTai);
+					cboTrangThai.setEnabled(true);
+				}
 			}
 			// Khởi tạo ComboBox Vị Trí và Sức Chứa (cho phép nhập tay)
-			cboViTri = new JComboBox<>(new String[] { "Tầng 1", "Tầng 2", "Tầng 3", "Sân" });
+			cboViTri = new JComboBox<>(new String[] { "Tầng 1", "Tầng 2", "Phòng VIP" });
 			cboViTri.setEditable(true);
 
-			cboSucChua = new JComboBox<>(new String[] {"2","4", "6", "8", "10", "12"});
+			cboSucChua = new JComboBox<>(new String[] { "2", "4", "6", "8", "10", "12" });
 			cboSucChua.setEditable(true);
 
 			txtMoTa = new JTextArea(4, 20);
@@ -404,11 +383,11 @@ public class FrmQLBanAn extends JPanel {
 			moTaPanel.setOpaque(false);
 			JLabel lbMoTa = new JLabel("Mô tả");
 			lbMoTa.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-			
+
 			// Tắt thanh cuộn đúng cách
 			JScrollPane scrollMoTa = new JScrollPane(txtMoTa);
 			scrollMoTa.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-			
+
 			moTaPanel.add(lbMoTa, BorderLayout.NORTH);
 			moTaPanel.add(scrollMoTa, BorderLayout.CENTER);
 
@@ -455,11 +434,12 @@ public class FrmQLBanAn extends JPanel {
 
 			txtTenBan.setText(banSua.getTenBan() != null ? banSua.getTenBan() : "");
 			cboTrangThai.setSelectedItem(banSua.getTrangThai());
-			
+
 			// Đổ dữ liệu vào ComboBox
-			if (banSua.getViTri() != null) cboViTri.setSelectedItem(banSua.getViTri());
+			if (banSua.getViTri() != null)
+				cboViTri.setSelectedItem(banSua.getViTri());
 			cboSucChua.setSelectedItem(String.valueOf(banSua.getSucChua()));
-			
+
 			txtMoTa.setText(banSua.getMoTa() != null ? banSua.getMoTa() : "");
 			if (banSua.getLoaiBan() != null) {
 				for (int i = 0; i < cboLoaiBan.getItemCount(); i++) {
@@ -507,7 +487,7 @@ public class FrmQLBanAn extends JPanel {
 			String tenBan = txtTenBan.getText().trim();
 			LoaiBan loaiBan = (LoaiBan) cboLoaiBan.getSelectedItem();
 			String trangThai = cboTrangThai.getSelectedItem().toString();
-			
+
 			// Lấy dữ liệu từ ComboBox
 			String viTri = layGiaTriCombo(cboViTri);
 			String sucChuaText = layGiaTriCombo(cboSucChua);
@@ -538,7 +518,7 @@ public class FrmQLBanAn extends JPanel {
 
 			return ban;
 		}
-		
+
 		// Hàm hỗ trợ lấy chuỗi từ ComboBox có setEditable(true)
 		private String layGiaTriCombo(JComboBox<String> cbo) {
 			Object value = cbo.isEditable() ? cbo.getEditor().getItem() : cbo.getSelectedItem();

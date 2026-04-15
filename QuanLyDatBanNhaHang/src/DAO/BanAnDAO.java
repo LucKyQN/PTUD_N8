@@ -119,23 +119,6 @@ public class BanAnDAO {
 		}
 	}
 
-	// HÀM MỚI: XÓA HOÀN TOÀN KHỎI DATABASE
-	public boolean xoaHoanToanBanAn(String maBan) {
-		String sql = "DELETE FROM BanAn WHERE maBan = ?";
-		try {
-			Connection con = getConnection();
-			PreparedStatement stmt = con.prepareStatement(sql);
-			stmt.setString(1, maBan);
-			int rows = stmt.executeUpdate();
-			stmt.close();
-			return rows > 0;
-		} catch (Exception e) {
-			System.err.println("Lỗi xóa hoàn toàn (có thể do dính khóa ngoại): " + e.getMessage());
-			e.printStackTrace();
-			return false;
-		}
-	}
-
 	public boolean capNhatTrangThai(String maBan, String trangThaiMoi) {
 		String sql = "UPDATE BanAn SET trangThai = ? WHERE maBan = ?";
 		try {
@@ -236,6 +219,58 @@ public class BanAnDAO {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public String taoMaBanTuDong() {
+		String sql = "SELECT TOP 1 maBan FROM BanAn WHERE maBan LIKE 'BAN%' ORDER BY maBan DESC";
+
+		try {
+			Connection con = getConnection();
+			PreparedStatement ps = con.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				String maCuoi = rs.getString("maBan"); // ví dụ BAN11
+				if (maCuoi != null && maCuoi.matches("BAN\\d+")) {
+					int so = Integer.parseInt(maCuoi.substring(3));
+					rs.close();
+					ps.close();
+					return String.format("BAN%02d", so + 1);
+				}
+			}
+
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return "BAN01";
+	}
+
+	public List<BanAn> getDanhSachBanDangSuDung() {
+		List<BanAn> list = new ArrayList<>();
+
+		String sql = "SELECT b.maBan, b.maLB, l.tenLB, l.soGhe, b.tenBan, b.viTri, b.sucChua, b.trangThai, b.moTa "
+				+ "FROM BanAn b " + "LEFT JOIN LoaiBan l ON b.maLB = l.maLB "
+				+ "WHERE b.trangThai IN (N'Trống', N'Có khách', N'Đã đặt') " + "ORDER BY b.maBan";
+
+		try {
+			Connection con = getConnection();
+			PreparedStatement stmt = con.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				list.add(mapBanAn(rs));
+			}
+
+			rs.close();
+			stmt.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return list;
 	}
 
 	private BanAn mapBanAn(ResultSet rs) throws Exception {

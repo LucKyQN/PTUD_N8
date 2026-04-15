@@ -57,15 +57,12 @@ public class FrmQLMonAn extends JPanel {
 
 		JButton btnThem = new JButton("Thêm");
 		JButton btnSua = new JButton("Sửa");
-		JButton btnXoaMem = new JButton("Xóa mềm");
-		JButton btnXoaHoanToan = new JButton("Xóa hoàn toàn"); // Nút mới
+		JButton btnXoaMem = new JButton("Xóa");
 
 		btnThem.addActionListener(e -> moDialogThem());
 		btnSua.addActionListener(e -> moDialogSua());
 		btnXoaMem.addActionListener(e -> xoaMemMonAn());
-		btnXoaHoanToan.addActionListener(e -> xoaHoanToanMonAn()); // Sự kiện nút mới
 
-		btnPanel.add(btnXoaHoanToan); // Thay thế vị trí nút Làm mới
 		btnPanel.add(btnXoaMem);
 		btnPanel.add(btnSua);
 		btnPanel.add(btnThem);
@@ -326,33 +323,6 @@ public class FrmQLMonAn extends JPanel {
 		}
 	}
 
-	// HÀM MỚI: XÓA HOÀN TOÀN
-	private void xoaHoanToanMonAn() {
-		MonAn mon = getMonAnDangChon();
-		if (mon == null) {
-			JOptionPane.showMessageDialog(this, "Vui lòng chọn món ăn cần xóa hoàn toàn.");
-			return;
-		}
-
-		// Hiển thị cảnh báo mạnh hơn cho thao tác xóa vĩnh viễn
-		int confirm = JOptionPane.showConfirmDialog(this,
-				"CẢNH BÁO: Xóa hoàn toàn món " + mon.getMaMonAn() + " - " + mon.getTenMon() + "?\n"
-						+ "Hành động này sẽ xóa dữ liệu vĩnh viễn và không thể hoàn tác!",
-				"Xóa hoàn toàn món ăn", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
-		if (confirm != JOptionPane.YES_OPTION)
-			return;
-
-		// Lưu ý: Cần đảm bảo DAO có phương thức xoaHoanToanMonAn(String maMon)
-		if (dao.xoaHoanToanMonAn(mon.getMaMonAn())) {
-			JOptionPane.showMessageDialog(this, "Đã xóa hoàn toàn món ăn khỏi cơ sở dữ liệu.");
-			loadTable();
-		} else {
-			JOptionPane.showMessageDialog(this,
-					"Xóa thất bại! Món ăn này có thể đang liên kết với hóa đơn hoặc dữ liệu khác.", "Lỗi",
-					JOptionPane.ERROR_MESSAGE);
-		}
-	}
 
 	// ==================== DIALOG THÊM/SỬA ====================
 	static class MonAnDialog extends JDialog {
