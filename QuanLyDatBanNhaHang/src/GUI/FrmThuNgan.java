@@ -72,7 +72,7 @@ public class FrmThuNgan extends JFrame {
 
 	private void initUI() {
 		setTitle("Thanh toán & Hóa đơn - Nhà Hàng Ngói Đỏ");
-		setSize(1440, 860);
+		setSize(1280, 800);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 

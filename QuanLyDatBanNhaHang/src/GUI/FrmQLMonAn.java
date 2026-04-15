@@ -237,20 +237,31 @@ public class FrmQLMonAn extends JPanel {
 	}
 
 	private void hienThiAnh(JLabel label, String imagePath, int width, int height) {
-		label.setIcon(null);
-		if (imagePath == null || imagePath.trim().isEmpty()) {
-			label.setText("Chưa có ảnh");
-			return;
-		}
-		File file = new File(imagePath);
-		if (!file.exists()) {
-			label.setText("Không tìm thấy ảnh");
-			return;
-		}
-		ImageIcon icon = new ImageIcon(imagePath);
-		Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-		label.setText("");
-		label.setIcon(new ImageIcon(img));
+	    label.setIcon(null);
+
+	    if (imagePath == null || imagePath.trim().isEmpty()) {
+	        label.setText("Chưa có ảnh");
+	        return;
+	    }
+
+	    try {
+	        String fullPath = "src/images/monan/" + imagePath;
+	        File file = new File(fullPath);
+
+	        if (!file.exists()) {
+	            label.setText("Không tìm thấy ảnh");
+	            return;
+	        }
+
+	        ImageIcon icon = new ImageIcon(fullPath);
+	        Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+
+	        label.setText("");
+	        label.setIcon(new ImageIcon(img));
+
+	    } catch (Exception e) {
+	        label.setText("Lỗi load ảnh");
+	    }
 	}
 
 	// ==================== LOAD TABLE ====================
@@ -506,26 +517,37 @@ public class FrmQLMonAn extends JPanel {
 			chooser.setDialogTitle("Chọn ảnh món ăn");
 			if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				File file = chooser.getSelectedFile();
-				txtAnhMon.setText(file.getAbsolutePath());
-				hienThiPreviewAnh(file.getAbsolutePath());
+				txtAnhMon.setText(file.getName());
+				hienThiPreviewAnh(file.getName());
 			}
 		}
 
 		private void hienThiPreviewAnh(String imagePath) {
-			lblPreviewAnh.setIcon(null);
-			if (imagePath == null || imagePath.trim().isEmpty()) {
-				lblPreviewAnh.setText("Chưa có ảnh");
-				return;
-			}
-			File file = new File(imagePath);
-			if (!file.exists()) {
-				lblPreviewAnh.setText("Không tìm thấy ảnh");
-				return;
-			}
-			ImageIcon icon = new ImageIcon(imagePath);
-			Image img = icon.getImage().getScaledInstance(180, 140, Image.SCALE_SMOOTH);
-			lblPreviewAnh.setText("");
-			lblPreviewAnh.setIcon(new ImageIcon(img));
+		    lblPreviewAnh.setIcon(null);
+
+		    if (imagePath == null || imagePath.trim().isEmpty()) {
+		        lblPreviewAnh.setText("Chưa có ảnh");
+		        return;
+		    }
+
+		    try {
+		        String fullPath = "src/images/monan/" + imagePath;
+		        File file = new File(fullPath);
+
+		        if (!file.exists()) {
+		            lblPreviewAnh.setText("Không tìm thấy ảnh");
+		            return;
+		        }
+
+		        ImageIcon icon = new ImageIcon(fullPath);
+		        Image img = icon.getImage().getScaledInstance(180, 140, Image.SCALE_SMOOTH);
+
+		        lblPreviewAnh.setText("");
+		        lblPreviewAnh.setIcon(new ImageIcon(img));
+
+		    } catch (Exception e) {
+		        lblPreviewAnh.setText("Lỗi load ảnh");
+		    }
 		}
 
 		private JPanel createField(String label, JComponent comp) {

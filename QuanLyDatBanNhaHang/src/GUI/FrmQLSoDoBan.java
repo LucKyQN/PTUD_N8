@@ -81,7 +81,7 @@ public class FrmQLSoDoBan extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER_CLR),
                 new EmptyBorder(12, 20, 0, 20)));
 
-        String[] tabNames = {"Tầng 1", "Tầng 2", "Phòng VIP"};
+        String[] tabNames = {"Tầng 1", "Tầng 2", "Ngoài Trời"};
         for (int i = 0; i < tabNames.length; i++) {
             JLabel lbl = new JLabel(tabNames[i]);
             lbl.setFont(new Font("Segoe UI", i == 0 ? Font.BOLD : Font.PLAIN, 14));
